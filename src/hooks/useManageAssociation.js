@@ -1,8 +1,8 @@
 import {useDispatch, useSelector} from "react-redux";
+import dayjs from "dayjs";
 
 let useManageAssociation;
 export default useManageAssociation = () => {
-    const dispatch = useDispatch()
     const connectedMember = useSelector(state => state.auth.user)
 
     const getMemberRelationType = (association) => {
@@ -18,10 +18,18 @@ export default useManageAssociation = () => {
     }
 
     const formatFonds = (fonds) => {
-        const formated = fonds.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+        const formated = fonds?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
         return `XOF ${formated} `
     }
 
+    const formatDate = (date) => {
+        let formated = ''
+        if(date) {
+            formated = dayjs(date).format('DD/MM/YYYY HH:mm:ss')
+        }
+        return formated
 
-    return {getMemberRelationType, formatFonds}
+    }
+
+    return {getMemberRelationType, formatFonds, formatDate}
 }

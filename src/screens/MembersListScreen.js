@@ -1,8 +1,7 @@
 import React, {useEffect} from 'react';
 import {View, Text, FlatList, StyleSheet} from "react-native";
 import {useDispatch, useSelector} from "react-redux";
-import {getAssociationMembers} from "../store/slices/associationSlice";
-import MemberItem from "../components/member/MemberItem";
+import MemberListItem from "../components/member/MemberListItem";
 import AppText from "../components/AppText";
 import AppAddNewButton from "../components/AppAddNewButton";
 import routes from "../navigation/routes";
@@ -23,7 +22,13 @@ function MembersListScreen({navigation}) {
 
            {associationMembers.length>0 && <FlatList data={associationMembers}
                       keyExtractor={item => item.id.toString()}
-                      renderItem={({item}) =><MemberItem nom={item.username}/>}
+                      renderItem={({item}) =>
+                          <MemberListItem
+                              username={item.username?item.username:item.nom}
+                              getMemberDetails={() => navigation.navigate('MemberDetails', item)}>
+                              <AppText>{item.statut}</AppText>
+                          </MemberListItem>
+                      }
             />}
             <View style={styles.addNew}>
                 <AppAddNewButton onPress={() => navigation.navigate(routes.NEW_MEMBER)}/>

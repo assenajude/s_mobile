@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {View,TouchableOpacity,TouchableWithoutFeedback, StyleSheet, ScrollView, Image} from "react-native";
 import {useDispatch, useSelector} from "react-redux";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
@@ -7,6 +7,7 @@ import defaultStyles from '../utilities/styles'
 import LottieView from "lottie-react-native";
 import useManageAssociation from "../hooks/useManageAssociation";
 import {getAssociationMembers} from "../store/slices/memberSlice";
+import {getAllCotisations} from "../store/slices/cotisationSlice";
 
 function DashboardScreen({navigation}) {
     const dispatch = useDispatch()
@@ -16,8 +17,13 @@ function DashboardScreen({navigation}) {
 
     const [showDescrip, setShowDescrip] = useState(false)
 
-    useEffect(() => {
+    const getStarted = useCallback(() => {
         dispatch(getAssociationMembers({associationId:currentAssociation.id}))
+        dispatch(getAllCotisations({associationId: currentAssociation.id}))
+    }, [])
+
+    useEffect(() => {
+        getStarted()
     }, [])
 
 
@@ -141,7 +147,7 @@ const styles = StyleSheet.create({
     link: {
         borderWidth: 1,
         borderColor: defaultStyles.colors.bleuFbi,
-        width: '90%',
+        width: '100%',
         padding: 20,
         alignItems: 'center',
         backgroundColor: defaultStyles.colors.white,

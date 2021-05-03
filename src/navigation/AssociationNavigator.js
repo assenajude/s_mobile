@@ -47,7 +47,7 @@ function AssociationNavigator(props) {
                         <View style={{
                             padding: 20
                         }}>
-                            <MaterialCommunityIcons name="account-group" size={30} color={defaultStyles.colors.white} />
+                            <MaterialCommunityIcons name="group" size={30} color={defaultStyles.colors.white} />
                         </View>
                     </TouchableWithoutFeedback>
                 })}/>

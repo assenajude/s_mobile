@@ -9,6 +9,7 @@ import {addNewMember} from "../store/slices/memberSlice";
 const validMember = Yup.object().shape({
     nom: Yup.string().required('Le nom est requis'),
     prenom: Yup.string(),
+    statut: Yup.string(),
     email: Yup.string().email().required('Ajoutez une adresse mail'),
     phone: Yup.string().required('Ajoutez un numero de telephone'),
     adresse: Yup.string(),
@@ -32,6 +33,7 @@ function NewMemberScreen(props) {
                 initialValues={{
                     nom: '',
                     prenom: '',
+                    statut: '',
                     email: '',
                     phone: '',
                     adresse: '',
@@ -42,6 +44,7 @@ function NewMemberScreen(props) {
             >
                 <AppFormField name='nom' placeholder='nom'/>
                 <AppFormField name='prenom' placeholder='prenom'/>
+                <AppFormField name='statut' placeholder='statut'/>
                 <AppFormField name='email' placeholder='email' keyboardType='email-address'/>
                 <AppFormField name='phone' placeholder='phone' keyboardType='numeric'/>
                 <AppFormField name='adresse' placeholder='autre adresse'/>

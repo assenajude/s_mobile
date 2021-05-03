@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect} from 'react';
-import {ScrollView, View, StyleSheet} from "react-native";
+import {ScrollView, View, StyleSheet, TouchableWithoutFeedback} from "react-native";
 import AppText from "../components/AppText";
 import {useDispatch, useSelector} from "react-redux";
 import {getMemberAssociations} from "../store/slices/memberSlice";
@@ -7,12 +7,15 @@ import AppButton from "../components/AppButton";
 import routes from "../navigation/routes";
 import {getLoggedIn} from "../store/slices/authSlice";
 import AssociationItem from "../components/association/AssociationItem";
-import {getAllAssociation, setSelectedAssociation} from "../store/slices/associationSlice";
+import {setSelectedAssociation} from "../store/slices/associationSlice";
 import AppActivityIndicator from "../components/AppActivityIndicator";
 import defaultStyles from '../utilities/styles'
+import useAuth from "../hooks/useAuth";
+import ListItemSeparator from "../components/ListItemSeparator";
 
 function StarterScreen({navigation}) {
     const dispatch = useDispatch()
+    const {isAdmin} = useAuth()
 
     const isLoading = useSelector(state => state.entities.association.loading)
     const memberAssociations = useSelector(state => {
@@ -39,7 +42,20 @@ function StarterScreen({navigation}) {
             {memberAssociations.length === 0 && <View style={styles.emptyStyle}>
                 <AppText>Vous n'appartenez à aucune association</AppText>
             </View>}
-            {memberAssociations.length > 0 && <ScrollView>
+                <View style={{
+                    flexDirection:'row',
+                    justifyContent: 'space-between',
+                    padding:20
+                }}>
+                    <TouchableWithoutFeedback onPress={() => dispatch(getLoggedIn())}>
+                        <AppText style={{color: defaultStyles.colors.bleuFbi}}>Aller au menu</AppText>
+                    </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback onPress={() => navigation.navigate(routes.ASSOCIATION_LIST)}>
+                        <AppText style={{color: defaultStyles.colors.bleuFbi}}>Adherer</AppText>
+                    </TouchableWithoutFeedback>
+                </View>
+                <ListItemSeparator/>
+            {memberAssociations.length > 0 && <ScrollView centerContent={true}>
                 {memberAssociations.map((item) =>
                     <AssociationItem key={item.id.toString()}
                         nom={item.nom}
@@ -49,10 +65,6 @@ function StarterScreen({navigation}) {
                         nameStyle={{color: defaultStyles.colors.bleuFbi}}
                     />)}
             </ScrollView>}
-            <View style={{padding: 10}}>
-                <AppButton title='Adherer à une association' onPress={() => navigation.navigate(routes.ASSOCIATION_LIST)}/>
-                <AppButton  onPress={() => dispatch(getLoggedIn())} title='Aller au menu'/>
-            </View>
             </>
     );
 }

@@ -1,47 +1,30 @@
 import React from 'react';
-import {View, Image, StyleSheet} from "react-native";
-import {MaterialCommunityIcons} from '@expo/vector-icons'
-import defaultStyles from '../../utilities/styles'
+import {Image, View, StyleSheet, TouchableWithoutFeedback} from "react-native";
 import AppText from "../AppText";
-import colors from "../../utilities/colors";
 
-function MemberItem({nom}) {
+function MemberItem({avatarSource, username, getMemberDetails}) {
     return (
-        <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: 10
-        }}>
-            <View style={styles.secondContainer}>
-                <MaterialCommunityIcons name='plus' size={30} color={defaultStyles.colors.dark}/>
-                <Image source={require('../../../assets/user_avatar.jpg')} style={styles.avatar}/>
-                <AppText>{nom}</AppText>
-            </View>
-            <View style={{
-                flexDirection: 'row'
-            }}>
-                <MaterialCommunityIcons name="check-circle" size={24} color={defaultStyles.colors.vert} />
-                <AppText style={{color:defaultStyles.colors.vert}}>à jour</AppText>
-            </View>
+        <TouchableWithoutFeedback onPress={getMemberDetails}>
+        <View style={styles.container}>
+            <Image source={avatarSource} style={styles.avatar}/>
+            <AppText style={{margin: 10}}>{username}</AppText>
         </View>
+        </TouchableWithoutFeedback>
     );
 }
 
 const styles = StyleSheet.create({
     avatar: {
-        height: 80,
-        width: 80,
-        borderRadius: 40,
+        height: 60,
+        width: 60,
+        borderRadius: 30,
         justifyContent: 'center',
         alignItems: 'center',
-        marginHorizontal: 20
     },
-    secondContainer: {
+    container: {
         flexDirection: 'row',
         alignItems: 'center',
         marginVertical: 20
     }
 })
-
 export default MemberItem;

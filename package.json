@@ -28,7 +28,8 @@
     "react-native-web": "~0.13.12",
     "react-redux": "^7.2.3",
     "redux": "^4.0.5",
-    "yup": "^0.32.9"
+    "yup": "^0.32.9",
+    "dayjs": "latest"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
