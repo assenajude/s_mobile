@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 
 let useCotisation;
 export default useCotisation = () => {
+    const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
+    const listCotisations = useSelector(state => state.entities.cotisation.list)
     const yearCotisations = useSelector(state => state.entities.cotisation.memberYearCotisations)
 
     const getMonthString = (number) => {
@@ -40,7 +42,7 @@ export default useCotisation = () => {
 
     const getMonthCotisations = (month) => {
         const monthCotisations = yearCotisations.filter(cotisation => {
-            const cotisationdate = cotisation.createdAt
+            const cotisationdate = cotisation.datePayement
             const cotisationMonth = dayjs(cotisationdate).month()
             if(cotisationMonth === month.number) return true
             return false
@@ -56,5 +58,40 @@ export default useCotisation = () => {
         })
         return total
     }
-return {getMonthString, getMonthCotisations, getMonthTotal}
+    const getMemberCotisations = (member) => {
+        let cotisationLenght = 0
+        let totalCotisation = 0
+        const memberCotisations = listCotisations.filter(item => item.memberId === member.member.id)
+        cotisationLenght = memberCotisations.length
+        memberCotisations.forEach(cotis => {
+            totalCotisation += cotis.montant
+        })
+        return {cotisationLenght, totalCotisation}
+    }
+
+    const getAssociationCotisation = () => {
+        let total = 0
+        const cotisLenght = listCotisations.length
+        listCotisations.forEach(cotis => {
+            total += cotis.montant
+        })
+        return {total, cotisLenght}
+    }
+
+    const checkCotisationUpToDate = (member) => {
+        const now = new Date()
+        const nowMonth = dayjs(now).month()
+        const memberCotisatons = listCotisations.filter(item => item.memberId === member.member.id)
+        const stringMonth = getMonthString(nowMonth+1).toLowerCase()
+        let isMonthCotis = false
+        memberCotisatons.forEach(cotis => {
+            const motif = cotis.motif.toLowerCase()
+            const label = 'cotisation mensuelle'
+            if(motif.indexOf(label) !== -1 && motif.indexOf(stringMonth) !== -1 && cotis.montant === currentAssociation.cotisationMensuelle) isMonthCotis = true
+        })
+        return isMonthCotis
+
+    }
+
+return {getMonthString, getMonthCotisations, getMonthTotal, getMemberCotisations, checkCotisationUpToDate, getAssociationCotisation}
 }

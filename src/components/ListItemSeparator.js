@@ -3,9 +3,9 @@ import  {View, StyleSheet} from "react-native";
 
 import defaultStyles from '../utilities/styles'
 
-function ListItemSeparator(props) {
+function ListItemSeparator({width='100%'}) {
     return (
-        <View style={styles.separator}>
+        <View style={[styles.separator, {width: width}]}>
         </View>
     );
 }
@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
         borderColor: defaultStyles.colors.leger,
         borderWidth: 0.5,
         height: 1,
-        width: '100%'
     }
 })
 export default ListItemSeparator;

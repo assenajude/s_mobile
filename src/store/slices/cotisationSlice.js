@@ -44,7 +44,7 @@ const cotisationSlice = createSlice({
             const memberCotisations = state.list.filter(cotis => cotis.memberId === action.payload.memberId)
             const newCotisationTab = []
             memberCotisations.forEach(cotisation => {
-                const creationDate = cotisation.createdAt
+                const creationDate = cotisation.datePayement
                 const creationYear = dayjs(creationDate).year()
                 if(creationYear === selectedYear.year) {
                     newCotisationTab.push(cotisation)
@@ -54,7 +54,7 @@ const cotisationSlice = createSlice({
         },
         showMonthDetail: (state, action) => {
             const selectedCotisation = state.memberYearCotisations.filter(cotisation => {
-                const cotisationdate = cotisation.createdAt
+                const cotisationdate = cotisation.datePayement
                 const cotisationMonth = dayjs(cotisationdate).month()
                 if(cotisationMonth === action.payload.number) return true
                 return false
@@ -64,6 +64,14 @@ const cotisationSlice = createSlice({
             selectedMonth.showDetail = !selectedMonth.showDetail
             const otherMonths = state.months.filter(item => item.label !== selectedMonth.label)
             otherMonths.forEach(item => item.showDetail = false)
+        },
+        showCotisationDetails: (state, action) => {
+            let selectedCotisation = state.selectedMonthCotisations.find(cotisation => cotisation.id === action.payload.id)
+            if(selectedCotisation) {
+                selectedCotisation.showDetail = !selectedCotisation.showDetail
+            }
+            const others = state.selectedMonthCotisations.filter(cotisation => cotisation.id !== selectedCotisation.id)
+            others.forEach(cotisation => cotisation.showDetail = false)
         }
     }
 })
@@ -71,7 +79,7 @@ const cotisationSlice = createSlice({
 export default cotisationSlice.reducer
 const {initTimeData, selectYear, showMonthDetail,
     cotisationAdded, cotisationRequested,
-    cotisationRequestFailed, cotisationReceived} = cotisationSlice.actions
+    cotisationRequestFailed, cotisationReceived, showCotisationDetails} = cotisationSlice.actions
 
 const url = '/cotisations'
 
@@ -103,4 +111,8 @@ export const getYearSelected = (year) => dispatch => {
 
 export const getMonthDetails = (month) => dispatch => {
     dispatch(showMonthDetail(month))
+}
+
+export const getCotisationDetails = (cotisation) => dispatch => {
+    dispatch(showCotisationDetails(cotisation))
 }

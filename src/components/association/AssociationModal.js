@@ -1,7 +1,8 @@
 import React from 'react';
-import {View, Modal, TouchableOpacity, StyleSheet, ScrollView, Image, TouchableWithoutFeedback} from "react-native";
+import {View, Modal, TouchableOpacity, StyleSheet, FlatList, Image, TouchableWithoutFeedback} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import defaultStyles from '../../utilities/styles'
+import AssociationItem from "./AssociationItem";
 import AppText from "../AppText";
 
 function AssociationModal({visible, closeModal, associations, selectAssociation}) {
@@ -19,20 +20,17 @@ function AssociationModal({visible, closeModal, associations, selectAssociation}
                         style={{fontWeight: 'bold'}} name="close" size={24}
                         color={defaultStyles.colors.rougeBordeau} />
                 </TouchableOpacity>
-                <ScrollView horizontal>
-                    {associations.map((item) => <TouchableWithoutFeedback
-                        key={item.id.toString()}
-                        onPress={() => selectAssociation(item)}
-                        >
-                        <View style={styles.associationContainer}>
-                            <Image style={styles.image} source={require('../../../assets/peuple_solidaire.png')}/>
-                            <View>
-                                <AppText numberOfLines={1} style={styles.nom}>{item.nom}</AppText>
-                            </View>
-                        </View>
-                        </TouchableWithoutFeedback>
-                       )}
-                </ScrollView>
+                <View style={{alignItems: 'center', paddingVertical: 20}}>
+                    <AppText style={{color: defaultStyles.colors.bleuFbi, fontWeight: 'bold'}}>Liste de vos associations</AppText>
+                </View>
+                <FlatList data={associations}
+                          keyExtractor={item => item.id.toString()}
+                          numColumns={2}
+                          renderItem={({item}) =>
+                              <AssociationItem
+                                  nom={item.nom} showState={false}
+                                  onPress={() => selectAssociation(item)}/>}
+                />
             </View>
         </Modal>
     );
@@ -64,6 +62,7 @@ const styles = StyleSheet.create({
     nom: {
         color: defaultStyles.colors.bleuFbi,
         width: 150,
+        textAlign: 'center'
     }
 })
 

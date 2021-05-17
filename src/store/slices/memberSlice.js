@@ -8,8 +8,8 @@ const memberSlice = createSlice({
         error: null,
         list: [],
         memberAssociations: [],
+        memberInfos: [],
         randomIdentity: {}
-
     },
     reducers: {
         memberRequested: (state,action) => {
@@ -20,16 +20,17 @@ const memberSlice = createSlice({
             state.loading = false
             state.error = action.payload
         },
+        allMembersReceived: (state, action) => {
+         state.loading = false
+         state.error = null
+         state.list = action.payload
+        },
         memberAssociationReceived: (state, action) => {
             state.loading = false
             state.error = null
             state.memberAssociations=  action.payload
         },
-        membersReceived: (state, action) => {
-            state.loading = false
-            state.error = null
-            state.list = action.payload
-        },
+
         memberAdded: (state, action) => {
             state.loading = false
             state.error = null
@@ -40,16 +41,36 @@ const memberSlice = createSlice({
                 password: newAdded.randomPass
             }
             state.randomIdentity = random
+        },
+        updateOne: (state, action) => {
+            state.loading = false
+            state.error = null
+            const updatedIndex = state.list.findIndex(item => item.id === action.payload.id)
+            state.list[updatedIndex] = action.payload
+        },
+        memberInfosReceived: (state, action) => {
+            state.loading = false
+            state.error = null
+            const infos = action.payload
+            state.memberInfos = infos
         }
 
     }
 })
 
 const {memberRequested, memberRequestFailed, memberAssociationReceived,
-    memberAdded, membersReceived} = memberSlice.actions
+    memberAdded,updateOne, memberInfosReceived, allMembersReceived} = memberSlice.actions
 export default memberSlice.reducer
 
 const url = '/members'
+
+export const getAllMembers = () => apiRequested({
+    url,
+    method: 'get',
+    onStart: memberRequested.type,
+    onSuccess: allMembersReceived.type,
+    onError: memberRequestFailed.type
+})
 
 export const getMemberAssociations = () => apiRequested({
     url:url+'/associations',
@@ -68,12 +89,39 @@ export const addNewMember = (data) => apiRequested({
     onError: memberRequestFailed.type
 })
 
-export const getAssociationMembers = (data) => apiRequested({
-    url:url+'/all',
+
+export const getUpdateOneMember = (data) => apiRequested({
+    url:url+'/updateOne',
     data,
-    method: 'post',
+    method: 'patch',
     onStart: memberRequested.type,
-    onSuccess: membersReceived.type,
+    onSuccess: updateOne.type,
     onError: memberRequestFailed.type
 })
 
+export const getMemberInfos = (data) => apiRequested({
+    url: url+'/informations',
+    data,
+    method: 'post',
+    onStart: memberRequested.type,
+    onSuccess: memberInfosReceived.type,
+    onError: memberRequestFailed.type
+})
+
+export const readMemberInfos =(data) => apiRequested({
+    url:url+'/readInfos',
+    data,
+    method: 'patch',
+    onStart: memberRequested.type,
+    onSuccess: memberInfosReceived.type,
+    onError: memberRequestFailed.type
+})
+
+export const sendAdhesionMessage = (data) => apiRequested({
+    url:url+'/sendAdhesionMessage',
+    data,
+    method: 'patch',
+    onStart: memberRequested.type,
+    onSuccess: allMembersReceived.type,
+    onError: memberRequestFailed.type
+})

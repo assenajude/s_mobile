@@ -7,6 +7,9 @@ import AppLabelWithIcon from "../components/AppLabelWithIcon";
 import AssociationModal from "../components/association/AssociationModal";
 import {useSelector} from "react-redux";
 import defaultStyles from "../utilities/styles";
+import NewsScreen from "../screens/NewsScreen";
+import NewInformationScreen from "../screens/NewInformation";
+import NouvelleAdhesionScreen from "../screens/NouvelleAdhesionScreen";
 
 const AssocNavig = createStackNavigator()
 
@@ -51,6 +54,15 @@ function AssociationNavigator(props) {
                         </View>
                     </TouchableWithoutFeedback>
                 })}/>
+                <AssocNavig.Screen name='NEWS' component={NewsScreen} options={{
+                    title: 'The News'
+                }}/>
+                <AssocNavig.Screen name='NewInformations' component={NewInformationScreen} options={{
+                    title: 'nouvelle information'
+                }}/>
+                <AssocNavig.Screen name='NouvelleAdhesionScreen' component={NouvelleAdhesionScreen} options={{
+                    title: 'Liste des nouvelles adhesion'
+                }}/>
         </AssocNavig.Navigator>
 
             <AssociationModal visible={associationModalVisible}

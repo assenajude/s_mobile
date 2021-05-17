@@ -5,14 +5,15 @@ import AppAddNewButton from "../components/AppAddNewButton";
 import routes from "../navigation/routes";
 import {useDispatch, useSelector} from "react-redux";
 import AppText from "../components/AppText";
-import {getAllAssociation, sendAdhesionMessage} from "../store/slices/associationSlice";
+import {getAllAssociation} from "../store/slices/associationSlice";
 import AppActivityIndicator from "../components/AppActivityIndicator";
 import AssociationItem from "../components/association/AssociationItem";
 import useManageAssociation from "../hooks/useManageAssociation";
+import {sendAdhesionMessage} from "../store/slices/memberSlice";
 
 function ListAssociationScreen({navigation}) {
     const {isAdmin} = useAuth()
-    const {getMemberRelationType} = useManageAssociation()
+    const {getMemberRelationType, getAssociatonAllMembers} = useManageAssociation()
     const dispatch = useDispatch()
 
     const connectedMember = useSelector(state => state.auth.user)
@@ -24,8 +25,8 @@ function ListAssociationScreen({navigation}) {
     const handleSendAdhesionMessage = (item) => {
         const data = {
             associationId: item.id,
-            memberId: connectedMember.id,
-            motif: 'adhesion'
+            userId: connectedMember.id,
+            relation: 'onDemand'
         }
         dispatch(sendAdhesionMessage(data))
     }
@@ -41,18 +42,19 @@ function ListAssociationScreen({navigation}) {
     return (
         <>
             <AppActivityIndicator visible={isLoadding}/>
-            {associationList?.length === 0 && <View style={styles.emptyStyle}>
+            {associationList?.length === 0 && !isLoadding && <View style={styles.emptyStyle}>
                 <AppText>Aucune association trouvée</AppText>
             </View>}
             {associationList?.length > 0 &&
             <FlatList
                 data={associationList}
                 keyExtractor={item => item.id.toString()}
+                numColumns={2}
                 renderItem={({item}) =>
                     <AssociationItem
                         nom={item.nom}
                         sendAdhesionMessage={() => handleSendAdhesionMessage(item)}
-                        isMember={item.members?.some(member => member.id === connectedMember.id)}
+                        isMember={getAssociatonAllMembers(item)?.some(member => member.userId === connectedMember.id)}
                         relationType={getMemberRelationType(item)}
                     />}
             />}

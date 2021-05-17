@@ -2,7 +2,12 @@ import React, {useEffect, useRef} from 'react';
 import {ScrollView, View,FlatList, StyleSheet} from "react-native";
 import {useDispatch, useSelector} from "react-redux";
 
-import {getMonthDetails, getYearSelected, populateTimeData} from "../store/slices/cotisationSlice";
+import {
+    getCotisationDetails,
+    getMonthDetails,
+    getYearSelected,
+    populateTimeData
+} from "../store/slices/cotisationSlice";
 import {initYears} from '../utilities/years'
 import {initMonth} from '../utilities/months'
 import YearItem from "../components/cotisation/YearItem";
@@ -10,6 +15,7 @@ import MonthItem from "../components/cotisation/MonthItem";
 import ListItemSeparator from "../components/ListItemSeparator";
 import useCotisation from "../hooks/useCotisation";
 import AppAddNewButton from "../components/AppAddNewButton";
+import AppActivityIndicator from "../components/AppActivityIndicator";
 
 
 function MemberCotisationScreen({route, navigation}) {
@@ -19,19 +25,14 @@ function MemberCotisationScreen({route, navigation}) {
     const {getMonthTotal} = useCotisation()
 
     const selectedMonthCotisations = useSelector(state => state.entities.cotisation.selectedMonthCotisations)
-    const memberCotisations = useSelector(state => {
-        const allCotisation = state.entities.cotisation.list
-        const selectedMemberCotisation = allCotisation.filter(cotis => cotis.memberId === selectedMember?.id)
-        return selectedMemberCotisation
+    const isLoading = useSelector(state => state.entities.cotisation.loading)
 
-    })
-    const yearCotisations = useSelector(state => state.entities.cotisation.memberYearCotisations)
     const allYears = useSelector(state => state.entities.cotisation.years)
     const allMonths = useSelector(state => state.entities.cotisation.months)
 
 
     const handleSelectYear = (year) => {
-        dispatch(getYearSelected({...year, memberId: selectedMember.id}))
+        dispatch(getYearSelected({...year, memberId: selectedMember.member.id}))
     }
 
     const handleMonthDetail = (month) => {
@@ -44,22 +45,47 @@ function MemberCotisationScreen({route, navigation}) {
         const currentYearData = {
             year: currentYear,
             selected: false,
-            memberId: selectedMember.id
+            memberId: selectedMember.member.id
         }
         dispatch(getYearSelected(currentYearData))
     }
     setTimeout(() => {
-        scrollRef.current?.scrollTo({x:50, y:0})
-    }, 1000)
+        scrollRef.current?.scrollToEnd()
+    }, 500)
+
+
+    const handleCotisationDetails = (cotisation) => {
+        dispatch(getCotisationDetails(cotisation))
+    }
+
+    const populateData = () => {
+        let startData = initYears
+        const currentDate = new Date()
+        const currentYear = currentDate.getFullYear()
+        const isYearPresent = initYears.some(item => item.year === currentYear)
+        if(!isYearPresent) {
+            const newYear = {
+                year: currentYear,
+                selected: false
+            }
+            startData.push(newYear)
+        }
+        dispatch(populateTimeData({years: startData, months: initMonth}))
+
+    }
 
     useEffect(() => {
-        dispatch(populateTimeData({years: initYears, months: initMonth}))
-        initSelectYear()
-    }, [])
+        populateData()
+        const unsubscribe = navigation.addListener('focus', () => {
+            initSelectYear()
+        })
+        return unsubscribe
+    }, [navigation])
 
 
     return (
         <>
+            <AppActivityIndicator visible={isLoading}/>
             <View style={{
                 marginBottom: 20,
                 marginTop: 20
@@ -78,6 +104,7 @@ function MemberCotisationScreen({route, navigation}) {
                       keyExtractor={item => item.label}
                       renderItem={({item}) =>
                           <MonthItem month={item.label}
+                                     getCotisationDetails={handleCotisationDetails}
                                      monthTotal={getMonthTotal(item)}
                                      showMonthDetail={item.showDetail}
                                      showMonthItemDetail={() => handleMonthDetail(item)}

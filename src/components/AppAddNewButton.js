@@ -4,11 +4,11 @@ import {MaterialCommunityIcons} from '@expo/vector-icons'
 
 import defaultStyles from '../utilities/styles'
 
-function AppAddNewButton({onPress}) {
+function AppAddNewButton({onPress, name="plus-circle-outline"}) {
     return (
             <TouchableWithoutFeedback onPress={onPress}>
-                <View style={styles.buttonContainer}>
-                    <MaterialCommunityIcons name="plus-circle-outline" size={40} color={defaultStyles.colors.white} />
+                <View elevation={10} style={styles.buttonContainer}>
+                    <MaterialCommunityIcons name={name} size={40} color={defaultStyles.colors.white} />
                 </View>
             </TouchableWithoutFeedback>
     );

@@ -8,7 +8,7 @@ const associationSlice = createSlice({
         error: null,
         list: [],
         selectedAssociation: {},
-        selectedAssociationMembers: []
+        selectedAssociationMembers: [],
     },
     reducers: {
         associationRequested: (state) => {
@@ -32,6 +32,11 @@ const associationSlice = createSlice({
         },
         selectedAssociationSet: (state, action) => {
             state.selectedAssociation = action.payload
+        },
+        associationMembersReceived: (state, action) => {
+            state.loading = false
+            state.error = null
+            state.selectedAssociationMembers = action.payload
         }
 
     }
@@ -39,7 +44,7 @@ const associationSlice = createSlice({
 
 const {associationAdded, associationReceived,
     associationRequested, associationRequestFailed,
-    selectedAssociationSet} = associationSlice.actions
+    selectedAssociationSet, associationMembersReceived} = associationSlice.actions
 
 export default associationSlice.reducer
 
@@ -62,15 +67,15 @@ export const addNewAssociation = (data) => apiRequested({
     onError: associationRequestFailed.type
 })
 
-export const sendAdhesionMessage = (data) => apiRequested({
-    url:url+'/sendMessage',
+
+export const getSelectedAssociationMembers = (data) => apiRequested({
+    url:url+'/members',
     data,
-    method: 'patch',
+    method: 'post',
     onStart: associationRequested.type,
-    onSuccess: associationReceived.type,
+    onSuccess: associationMembersReceived.type,
     onError: associationRequestFailed.type
 })
-
 
 
 export const setSelectedAssociation = (association) => dispatch => {

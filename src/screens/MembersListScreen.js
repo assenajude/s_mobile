@@ -1,32 +1,35 @@
 import React, {useEffect} from 'react';
-import {View, Text, FlatList, StyleSheet} from "react-native";
-import {useDispatch, useSelector} from "react-redux";
+import {View, FlatList, StyleSheet} from "react-native";
+import {useSelector} from "react-redux";
 import MemberListItem from "../components/member/MemberListItem";
 import AppText from "../components/AppText";
 import AppAddNewButton from "../components/AppAddNewButton";
 import routes from "../navigation/routes";
+import ListItemSeparator from "../components/ListItemSeparator";
+import useManageAssociation from "../hooks/useManageAssociation";
 
 function MembersListScreen({navigation}) {
-    const dispatch = useDispatch()
-    const selectedAssociation = useSelector(state => state.entities.association.selectedAssociation)
-    const associationMembers = useSelector(state => state.entities.member.list)
+    const {associationValidMembers} = useManageAssociation()
 
     useEffect(() => {
     }, [])
 
     return (
         <>
-            {associationMembers.length===0 && <View style={styles.emptyStyle}>
+            {associationValidMembers().length===0 && <View style={styles.emptyStyle}>
                 <AppText>Aucun membre trouvé</AppText>
             </View>}
 
-           {associationMembers.length>0 && <FlatList data={associationMembers}
+           {associationValidMembers()?.length>0 &&
+           <FlatList data={associationValidMembers()}
                       keyExtractor={item => item.id.toString()}
+                     ItemSeparatorComponent={ListItemSeparator}
                       renderItem={({item}) =>
-                          <MemberListItem
+                          <MemberListItem memberAddress={item.email?item.email : item.phone}
                               username={item.username?item.username:item.nom}
+                              childrenStyle={{top: 30}}
                               getMemberDetails={() => navigation.navigate('MemberDetails', item)}>
-                              <AppText>{item.statut}</AppText>
+                              <AppText>{item.member.statut}</AppText>
                           </MemberListItem>
                       }
             />}

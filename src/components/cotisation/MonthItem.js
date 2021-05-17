@@ -7,7 +7,7 @@ import AppText from "../AppText";
 import useManageAssociation from "../../hooks/useManageAssociation";
 import CotisationItem from "./CotisationItem";
 
-function MonthItem({month, showMonthDetail, showMonthItemDetail, monthCotisations, monthTotal}) {
+function MonthItem({month, showMonthDetail, showMonthItemDetail, monthCotisations, monthTotal, getCotisationDetails}) {
     const {formatFonds} = useManageAssociation()
     return (
         <View style={{backgroundColor:showMonthDetail?defaultStyles.colors.white:defaultStyles.colors.lightGrey}}>
@@ -24,10 +24,11 @@ function MonthItem({month, showMonthDetail, showMonthItemDetail, monthCotisation
               {monthCotisations && monthCotisations.length>0 && <ScrollView>
                   {monthCotisations.map(item =>
                       <CotisationItem key={item.id.toString()}
-                                      cotisationDetail={item.showCotisationDetail}
-                                      creationDate={item.datePayement}
+                                      datePayement={item.datePayement}
                                       montant={item.montant}
-                                      motif={item.motif}/>)}
+                                      details={item.motif}
+                                      cotisationDetail={item.showDetail}
+                                      getCotisationDetails={() => getCotisationDetails(item)}/>)}
               </ScrollView>
               }
                 {monthCotisations.length === 0 && <AppText>pas de cotisations trouvées</AppText>}

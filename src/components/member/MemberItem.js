@@ -1,19 +1,33 @@
 import React from 'react';
-import {Image, View, StyleSheet, TouchableWithoutFeedback} from "react-native";
+import {View, StyleSheet, TouchableWithoutFeedback} from "react-native";
 import AppText from "../AppText";
+import defaultStyles from '../../utilities/styles'
+import AppAvatar from "../AppAvatar";
 
-function MemberItem({avatarSource, username, getMemberDetails}) {
+function MemberItem({username, getMemberDetails, avatarStyle, address}) {
     return (
         <TouchableWithoutFeedback onPress={getMemberDetails}>
         <View style={styles.container}>
-            <Image source={avatarSource} style={styles.avatar}/>
-            <AppText style={{margin: 10}}>{username}</AppText>
+            <AppAvatar avatarStyle={avatarStyle}/>
+            <View style={styles.addressContainer}>
+                <AppText style={styles.addressText}>{username}</AppText>
+                <AppText style={styles.addressText}>{address}</AppText>
+            </View>
         </View>
         </TouchableWithoutFeedback>
     );
 }
 
 const styles = StyleSheet.create({
+    addressContainer: {
+      alignItems: 'flex-start',
+        marginLeft: 10
+    },
+    addressText: {
+      color: defaultStyles.colors.grey,
+        fontWeight: '100',
+        fontSize: 15
+    },
     avatar: {
         height: 60,
         width: 60,
@@ -24,7 +38,6 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 20
     }
 })
 export default MemberItem;

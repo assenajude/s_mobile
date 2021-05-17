@@ -1,9 +1,8 @@
-import React, {useCallback, useEffect} from 'react';
-import {ScrollView, View, StyleSheet, TouchableWithoutFeedback} from "react-native";
+import React, {useEffect} from 'react';
+import {View, StyleSheet, TouchableWithoutFeedback, FlatList} from "react-native";
 import AppText from "../components/AppText";
 import {useDispatch, useSelector} from "react-redux";
-import {getMemberAssociations} from "../store/slices/memberSlice";
-import AppButton from "../components/AppButton";
+import {getAllMembers, getMemberAssociations} from "../store/slices/memberSlice";
 import routes from "../navigation/routes";
 import {getLoggedIn} from "../store/slices/authSlice";
 import AssociationItem from "../components/association/AssociationItem";
@@ -12,26 +11,31 @@ import AppActivityIndicator from "../components/AppActivityIndicator";
 import defaultStyles from '../utilities/styles'
 import useAuth from "../hooks/useAuth";
 import ListItemSeparator from "../components/ListItemSeparator";
+import AppButton from "../components/AppButton";
+import useManageAssociation from "../hooks/useManageAssociation";
 
 function StarterScreen({navigation}) {
     const dispatch = useDispatch()
     const {isAdmin} = useAuth()
+    const {getMemberRelationType, getAssociatonAllMembers} = useManageAssociation()
 
+    const currentUser = useSelector(state => state.auth.user)
     const isLoading = useSelector(state => state.entities.association.loading)
-    const memberAssociations = useSelector(state => {
-        const list = state.entities.member.memberAssociations
-        const validList = list.filter(ass => ass.associated_member.relation.toLowerCase() === 'valid')
-        return validList
-    })
-
-
+    const memberAssociations = useSelector(state => state.entities.member.memberAssociations)
 
     const handleGoToDashboard = (association) => {
+        const isMember = getMemberRelationType(association).toLowerCase() === 'member'
+        const isOnLeave = getMemberRelationType(association).toLowerCase() === 'onleave'
+
+        if(isMember || isOnLeave) {
         dispatch(getLoggedIn())
         dispatch(setSelectedAssociation(association))
+        } else
+            alert("Vous n'êtes pas encore membre de cette association")
     }
 
     useEffect(() => {
+        dispatch(getAllMembers())
         dispatch(getMemberAssociations())
     }, [])
 
@@ -39,10 +43,10 @@ function StarterScreen({navigation}) {
     return (
         <>
             <AppActivityIndicator visible={isLoading}/>
-            {memberAssociations.length === 0 && <View style={styles.emptyStyle}>
+            {memberAssociations.length === 0 && !isLoading && <View style={styles.emptyStyle}>
                 <AppText>Vous n'appartenez à aucune association</AppText>
             </View>}
-                <View style={{
+               {isAdmin() && <View style={{
                     flexDirection:'row',
                     justifyContent: 'space-between',
                     padding:20
@@ -53,18 +57,31 @@ function StarterScreen({navigation}) {
                     <TouchableWithoutFeedback onPress={() => navigation.navigate(routes.ASSOCIATION_LIST)}>
                         <AppText style={{color: defaultStyles.colors.bleuFbi}}>Adherer</AppText>
                     </TouchableWithoutFeedback>
-                </View>
+                </View>}
                 <ListItemSeparator/>
-            {memberAssociations.length > 0 && <ScrollView centerContent={true}>
-                {memberAssociations.map((item) =>
-                    <AssociationItem key={item.id.toString()}
-                        nom={item.nom}
-                        relationType={item.associated_member.relation}
-                        isMember={true}
-                        onPress={() => handleGoToDashboard(item)}
-                        nameStyle={{color: defaultStyles.colors.bleuFbi}}
-                    />)}
-            </ScrollView>}
+            {memberAssociations.length > 0 &&
+                <FlatList
+                    data={memberAssociations}
+                    keyExtractor={item => item.id.toString()}
+                    numColumns={2}
+                    renderItem={({item}) =>
+                        <AssociationItem
+                            nom={item.nom}
+                            relationType={getMemberRelationType(item)}
+                            isMember={getAssociatonAllMembers(item)?.some(member => member.userId === currentUser.id)}
+                            onPress={() => handleGoToDashboard(item)}
+                            nameStyle={{color: defaultStyles.colors.bleuFbi}}
+                        />}
+                />
+            }
+
+            {!isAdmin() && <View style={{
+                paddingHorizontal: 20,
+                paddingVertical: 20
+            }}>
+                <AppButton title='Adherer à une association'
+                           onPress={() => navigation.navigate(routes.ASSOCIATION_LIST)}/>
+            </View>}
             </>
     );
 }

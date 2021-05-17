@@ -5,5 +5,9 @@ export default Object.freeze({
     ASSOCIATION_LIST: 'ListAssociationScreen',
     NEW_ASSOCIATION: 'NewAssociationScreen',
     NEW_MEMBER: 'NewMemberScreen',
-    NEW_COTISATION: 'NewCotisationScreen'
+    NEW_COTISATION: 'NewCotisationScreen',
+    LIST_ENGAGEMENT: 'ListEngagementScreen',
+    NEW_ENGAGEMENT: 'NewEngagementScreen',
+    NEW_INFO: 'NewInformations',
+    NEW_ADHESION: 'NouvelleAdhesionScreen'
 })

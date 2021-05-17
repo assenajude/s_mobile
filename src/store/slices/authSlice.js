@@ -25,12 +25,17 @@ const authSlice = createSlice({
         },
         loggedIn: (state) => {
             state.isLoggedIn = !state.isLoggedIn
+        },
+        logout: (state) => {
+                state.isLoggedIn = false,
+                state.user = {}
         }
     }
 
 })
 
-const {authRequested, authRequestFailed, authRequestSuccess, loggedIn} = authSlice.actions
+const {authRequested, authRequestFailed, authRequestSuccess,
+    loggedIn, logout} = authSlice.actions
 export default authSlice.reducer
 
 const url = '/auth'
@@ -55,4 +60,8 @@ export const signin = (data) => apiRequested({
 
 export const getLoggedIn  = () => dispatch => {
     dispatch(loggedIn())
+}
+
+export const getLogout = () => dispatch => {
+    dispatch(logout())
 }

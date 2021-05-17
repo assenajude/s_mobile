@@ -5,7 +5,7 @@ import AppFormField from "../components/form/AppFormField";
 import * as Yup from 'yup'
 import FormSubmitButton from "../components/form/FormSubmitButton";
 import {useDispatch, useStore} from "react-redux";
-import {getLoggedIn, signin} from "../store/slices/authSlice";
+import {signin} from "../store/slices/authSlice";
 
 import defaultStyles from '../utilities/styles'
 import AppText from "../components/AppText";
@@ -64,7 +64,7 @@ function LoginScreen({navigation}) {
             >
                 <AppFormField
                     name='info'
-                    icon='email'
+                    icon='account'
                     keyboardType='email-address'
                     placeholder='email ou username'
                 />

@@ -1,54 +1,73 @@
-import React from 'react';
-import {ScrollView} from "react-native";
+import React, {useEffect, useState} from 'react';
+import {ScrollView, ToastAndroid} from "react-native";
 import * as Yup from 'yup'
 
 import {AppForm, AppFormField, FormSubmitButton} from "../components/form";
-import {useDispatch, useSelector} from "react-redux";
-import {addNewMember} from "../store/slices/memberSlice";
+import {useDispatch, useSelector, useStore} from "react-redux";
+import {addNewMember, getUpdateOneMember} from "../store/slices/memberSlice";
+import AppTimePicker from "../components/AppTimePicker";
 
 const validMember = Yup.object().shape({
-    nom: Yup.string().required('Le nom est requis'),
-    prenom: Yup.string(),
     statut: Yup.string(),
-    email: Yup.string().email().required('Ajoutez une adresse mail'),
-    phone: Yup.string().required('Ajoutez un numero de telephone'),
-    adresse: Yup.string(),
-    fonds: Yup.number()
+    fonds: Yup.number(),
+    relation: Yup.string(),
+    adhesionDate: Yup.date()
 })
-function NewMemberScreen(props) {
+function NewMemberScreen({route, navigation}) {
+    const store = useStore()
+    const selectEdited = route.params
     const dispatch = useDispatch()
     const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
+    const [edit, setEdit] = useState(selectEdited?true:false)
 
     const handleAddMember = (member) => {
-        const data = {
-            ...member,
-            associationId: currentAssociation.id
+        let data;
+        if (edit) {
+            data = {...member, currentMemberId: selectEdited.id}
+            dispatch(getUpdateOneMember(data))
+        } else {
+            data = {
+                ...member,
+                associationId: currentAssociation.id
+            }
+            dispatch(addNewMember(data))
         }
-       dispatch(addNewMember(data))
+        const error = store.getState().entities.member.error
+        if (error !== null) {
+            return alert('error: impossible de sauvegarder vos données.')
+        }else {
+            ToastAndroid.showWithGravityAndOffset(
+                'Données sauvegardées avec succès',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                25,
+                50
+            );
+            navigation.goBack()
+        }
     }
+
+
+    useEffect(() => {
+        console.log(selectEdited);
+    }, [])
 
     return (
         <ScrollView contentContainerStyle={{padding: 20}}>
             <AppForm
                 initialValues={{
-                    nom: '',
-                    prenom: '',
-                    statut: '',
-                    email: '',
-                    phone: '',
-                    adresse: '',
-                    fonds: ''
+                    statut: selectEdited? selectEdited.member.statut : '',
+                    fonds: selectEdited?String(selectEdited.member.fonds) : '',
+                    relation: selectEdited?selectEdited.member.relation: '',
+                    adhesionDate: selectEdited?selectEdited.adhesionDate:new Date()
                 }}
                 validationSchema={validMember}
                 onSubmit={handleAddMember}
             >
-                <AppFormField name='nom' placeholder='nom'/>
-                <AppFormField name='prenom' placeholder='prenom'/>
                 <AppFormField name='statut' placeholder='statut'/>
-                <AppFormField name='email' placeholder='email' keyboardType='email-address'/>
-                <AppFormField name='phone' placeholder='phone' keyboardType='numeric'/>
-                <AppFormField name='adresse' placeholder='autre adresse'/>
                 <AppFormField name='fonds' placeholder='fonds de depart'/>
+                <AppFormField name='relation' placeholder='type relation'/>
+                <AppTimePicker label='date adhesion' name='adhesionDate'/>
                 <FormSubmitButton title='Ajouter'/>
             </AppForm>
         </ScrollView>

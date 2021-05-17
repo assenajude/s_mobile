@@ -8,9 +8,10 @@ import {useDispatch, useStore} from "react-redux";
 const newAssociationValidSchema = Yup.object().shape({
     nom: Yup.string(),
     decription: Yup.string(),
-    cotisation: Yup.number(),
-    frequence: Yup.string(),
-    fonds: Yup.number()
+    cotisationMensuelle: Yup.number(),
+    frequenceCotisation: Yup.string(),
+    fonds: Yup.number(),
+    interetCredit: Yup.number()
 })
 function NewAssociationScreen({navigation}) {
     const store = useStore()
@@ -31,18 +32,21 @@ function NewAssociationScreen({navigation}) {
                 initialValues={{
                     nom: '',
                     description: '',
-                    cotisation: '',
-                    frequence: '',
-                    fonds: ''
+                    cotisationMensuelle: '',
+                    frequenceCotisation: '',
+                    fonds: '',
+                    interetCredit: ''
                 }}
                 validationSchema={newAssociationValidSchema}
                 onSubmit={handleNewAssociation}
             >
                 <AppFormField name='nom' placeholder='nom'/>
                 <AppFormField name='description' placeholder='description'/>
-                <AppFormField name='cotisation' placeholder='cotisation mensuelle'/>
-                <AppFormField name='frequence' placeholder='frequence cotisation'/>
+                <AppFormField name='cotisationMensuelle' placeholder='cotisation mensuelle'/>
+                <AppFormField name='frequenceCotisation' placeholder='frequence cotisation'/>
                 <AppFormField name='fonds' placeholder='fonds initial'/>
+                <AppFormField name='interetCredit' placeholder='taux de credit
+                '/>
                 <FormSubmitButton title='Ajouter'/>
             </AppForm>
         </ScrollView>

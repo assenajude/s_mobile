@@ -1,31 +1,52 @@
 import React from 'react';
-import {View,StyleSheet} from "react-native";
+import {View,StyleSheet, TouchableOpacity} from "react-native";
+import * as Progress from "react-native-progress";
+import Swipeable from "react-native-gesture-handler/Swipeable";
+
 import MemberItem from "./MemberItem";
 
-function MemberListItem({username, getMemberDetails, children}) {
+function MemberListItem({username,memberAddress, getMemberDetails,progress=0.4,showProgress=false,
+                            childrenStyle, renderRightActions, children}) {
     return (
-        <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            margin: 10
-        }}>
-           <MemberItem
+        <Swipeable renderRightActions={renderRightActions}>
+        <TouchableOpacity onPress={getMemberDetails}>
+        <View>
+            {showProgress && <View style={styles.progress}>
+                <Progress.Bar progress={progress} width={200} />
+            </View>}
+        <View style={styles.mainContent}>
+           <MemberItem address={memberAddress}
                avatarSource={require('../../../assets/user_avatar.jpg')}
                username={username}
                getMemberDetails={getMemberDetails}/>
 
-            <View style={{
-                flexDirection: 'row'
-            }}>
+        </View>
+            <View style={[{
+                flexDirection: 'row',
+                position: 'absolute',
+                right: 10,
+                top: 60
+            }, childrenStyle]}>
                 {children}
             </View>
         </View>
+        </TouchableOpacity>
+        </Swipeable>
     );
 }
 
 const styles = StyleSheet.create({
-
+    mainContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginVertical: 20
+    },
+    progress: {
+        position: 'absolute',
+        left:'25%',
+        top: 5
+    }
 })
 
 export default MemberListItem;

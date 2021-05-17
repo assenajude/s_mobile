@@ -2,13 +2,12 @@ import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {MaterialCommunityIcons, FontAwesome5} from '@expo/vector-icons'
 
 import React from 'react';
-import CompteScreen from "../screens/CompteScreen";
-import AllEngagementScreen from "../screens/AllEngagementScreen";
 import MembersNavigator from "./MembersNavigator";
 import AssociationNavigator from "./AssociationNavigator";
 import CotisationNavigation from "./CotisationNavigation";
 import defaultStyles from '../utilities/styles'
-import colors from "../utilities/colors";
+import CompteNavigator from "./CompteNavigator";
+import EngagementNavigator from "./EngagementNavigator";
 
 const MainNavig = createBottomTabNavigator();
 
@@ -35,13 +34,13 @@ function MainNavigator(props) {
                                       <FontAwesome5 name="money-check-alt" size={size} color={color} />
                                   )
                               }}/>
-            <MainNavig.Screen name='Engagements' component={AllEngagementScreen}
+            <MainNavig.Screen name='Engagements' component={EngagementNavigator}
                               options={{
                                   tabBarIcon: ({size, color}) => (
                                       <MaterialCommunityIcons name="source-commit" size={size} color={color} />
                                   )
                               }}/>
-            <MainNavig.Screen name='Moi' component={CompteScreen}  options={{
+            <MainNavig.Screen name='Moi' component={CompteNavigator}  options={{
                 tabBarIcon: ({color, size}) => (
                     <MaterialCommunityIcons name='account' size={size} color={color}/>
                 )
