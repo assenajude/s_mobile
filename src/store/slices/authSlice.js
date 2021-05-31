@@ -7,7 +7,9 @@ const authSlice = createSlice({
         loading: false,
         error: null,
         isLoggedIn: false,
-        user: {}
+        user: {},
+        roles: [],
+        token: null
     },
     reducers: {
         authRequested: (state, action) => {
@@ -21,7 +23,14 @@ const authSlice = createSlice({
         authRequestSuccess: (state,action) => {
             state.loading = false
             state.error = null
-            state.user = action.payload
+            state.user = action.payload.user
+            state.roles = action.payload.roles
+            state.token = action.payload.accessToken
+        },
+        userUpdated: (state, action) => {
+          state.loading = false,
+          state.error = null
+          state.user = action.payload
         },
         loggedIn: (state) => {
             state.isLoggedIn = !state.isLoggedIn
@@ -35,7 +44,7 @@ const authSlice = createSlice({
 })
 
 const {authRequested, authRequestFailed, authRequestSuccess,
-    loggedIn, logout} = authSlice.actions
+    loggedIn, logout, userUpdated} = authSlice.actions
 export default authSlice.reducer
 
 const url = '/auth'
@@ -58,6 +67,31 @@ export const signin = (data) => apiRequested({
     onError: authRequestFailed.type
 })
 
+export const saveEditInfo = (data) => apiRequested({
+    url:'/user/editInfo',
+    data,
+    method: 'patch',
+    onStart: authRequested.type,
+    onSuccess: userUpdated.type,
+    onError: authRequestFailed.type
+})
+export const saveEditFund = (data) => apiRequested({
+    url:'/user/editFund',
+    data,
+    method: 'patch',
+    onStart: authRequested.type,
+    onSuccess: userUpdated.type,
+    onError: authRequestFailed.type
+})
+
+export const getUserImagesEdit = (data) => apiRequested({
+    url:'/user/editImages',
+    data,
+    method: 'patch',
+    onStart: authRequested.type,
+    onSuccess: userUpdated.type,
+    onError: authRequestFailed.type
+})
 export const getLoggedIn  = () => dispatch => {
     dispatch(loggedIn())
 }

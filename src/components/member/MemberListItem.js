@@ -5,8 +5,8 @@ import Swipeable from "react-native-gesture-handler/Swipeable";
 
 import MemberItem from "./MemberItem";
 
-function MemberListItem({username,memberAddress, getMemberDetails,progress=0.4,showProgress=false,
-                            childrenStyle, renderRightActions, children}) {
+function MemberListItem({selectedMember,getMemberDetails,progress=0.4,showProgress=false,
+                            childrenStyle, renderRightActions,deleteAvatar,avatarStyle, children}) {
     return (
         <Swipeable renderRightActions={renderRightActions}>
         <TouchableOpacity onPress={getMemberDetails}>
@@ -15,10 +15,8 @@ function MemberListItem({username,memberAddress, getMemberDetails,progress=0.4,s
                 <Progress.Bar progress={progress} width={200} />
             </View>}
         <View style={styles.mainContent}>
-           <MemberItem address={memberAddress}
-               avatarSource={require('../../../assets/user_avatar.jpg')}
-               username={username}
-               getMemberDetails={getMemberDetails}/>
+           <MemberItem selectedMember={selectedMember} deleteAvatar={deleteAvatar}
+               getMemberDetails={getMemberDetails} avatarStyle={avatarStyle}/>
 
         </View>
             <View style={[{

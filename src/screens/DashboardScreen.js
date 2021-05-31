@@ -11,22 +11,36 @@ import {getAllCotisations} from "../store/slices/cotisationSlice";
 import ListItemSeparator from "../components/ListItemSeparator";
 import FondsLabel from "../components/association/FondsLabel";
 import AppLinkButton from "../components/AppLinkButton";
-import {getEngagementsByAssociation} from "../store/slices/engagementSlice";
+import {getAllVotes, getEngagementsByAssociation} from "../store/slices/engagementSlice";
 import useCotisation from "../hooks/useCotisation";
 import useEngagement from "../hooks/useEngagement";
 import {getAssociationInfos} from "../store/slices/informationSlice";
-import {getSelectedAssociationMembers} from "../store/slices/associationSlice";
+import {getSelectedAssociationMembers, getMemberRoles} from "../store/slices/associationSlice";
 import routes from "../navigation/routes";
+import AppHeaderGradient from "../components/AppHeaderGradient";
+import useAuth from "../hooks/useAuth";
+import AppAddNewButton from "../components/AppAddNewButton";
+import AssociationBackImage from "../components/association/AssociationBackImage";
 
 function DashboardScreen({navigation}) {
     const dispatch = useDispatch()
     const store = useStore()
-    const {formatFonds} = useManageAssociation()
+    const {isModerator, isAdmin} = useAuth()
+    const {formatFonds,getNewAdhesion,getManagedAssociationFund} = useManageAssociation()
     const {getAssociationCotisation} = useCotisation()
     const {getAssociationEngagementTotal} = useEngagement()
 
     const currentUser = useSelector(state => state.auth.user)
     const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
+    const benefice = useSelector(state => {
+        let totalBenefice = 0
+        const listEngagement = state.entities.engagement.list
+        const endedList = listEngagement.filter(engage => engage.statut.toLowerCase() === 'ended')
+        endedList.forEach(item => {
+            totalBenefice += item.interetMontant
+        })
+        return totalBenefice
+    })
     const members = useSelector(state => {
         const list = state.entities.member.list
         const selectedList = list.filter(item => item.associationId === currentAssociation.id)
@@ -44,17 +58,25 @@ function DashboardScreen({navigation}) {
     })
 
     const [showDescrip, setShowDescrip] = useState(false)
+    const isAuthorized = isAdmin() || isModerator()
 
     const getStarted = useCallback(async () => {
-        const currentMember = members.find(item => item.userId === currentUser.id)
         dispatch(getAllCotisations({associationId: currentAssociation.id}))
         dispatch(getAllMembers())
         dispatch(getEngagementsByAssociation({associationId:currentAssociation.id}))
         dispatch(getAssociationInfos({associationId: currentAssociation.id}))
-        dispatch(getMemberInfos({memberId: currentMember.id}))
         dispatch(getSelectedAssociationMembers({associationId: currentAssociation.id}))
-
+        dispatch(getAllVotes({associationId: currentAssociation.id}))
+        if(members.length>0) {
+            const currentMember = members.find(item => item.userId === currentUser.id)
+            dispatch(getMemberInfos({memberId: currentMember.id}))
+            dispatch(getMemberRoles({memberId: currentMember.id}))
+        }
     }, [])
+
+    const handleChangeImage = (result) => {
+        console.log(result)
+    }
 
     useEffect(() => {
         getStarted()
@@ -64,8 +86,10 @@ function DashboardScreen({navigation}) {
     return (
         <>
             <ScrollView>
-                <Image style={styles.image} source={require('../../assets/peuple_solidaire.png')}/>
-                <AppText style={{alignSelf: 'center', marginVertical: 10, fontWeight: 'bold'}}>{currentAssociation.nom}</AppText>
+            <AppHeaderGradient/>
+            <AssociationBackImage association={currentAssociation} uploadResult={handleChangeImage}/>
+         {/*       <Image style={styles.image} source={currentAssociation.avatar?{uri: currentAssociation.avatar}:require('../../assets/peuple_solidaire.png')}/>
+                <AppText style={{alignSelf: 'center', marginVertical: 10, fontWeight: 'bold'}}>{currentAssociation.nom}</AppText>*/}
                 <View style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
@@ -94,12 +118,12 @@ function DashboardScreen({navigation}) {
                     <View style={{flexDirection: 'row', justifyContent: 'space-between', padding:10 }}>
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
                         <MaterialCommunityIcons name="credit-card" size={24} color={defaultStyles.colors.vert}/>
-                        <AppText style={{color: defaultStyles.colors.vert}}>Disponible</AppText>
+                        <AppText style={{color: defaultStyles.colors.vert}}>Solde</AppText>
                         </View>
                         <LottieView style={{ width: 100}} autoPlay={true} loop={true} source={require('../../assets/animations/money')}/>
                     </View>
                         <View style={{alignItems: 'center', marginBottom: 20}}>
-                            <AppText style={{color: defaultStyles.colors.vert, fontSize: 20}}>{formatFonds(currentAssociation.fonds)}</AppText>
+                            <AppText style={{color: defaultStyles.colors.vert, fontSize: 20}}>{formatFonds(currentAssociation.fondInitial)}</AppText>
                         </View>
                     </View>
                     <View style={{alignItems: 'center'}}>
@@ -107,17 +131,17 @@ function DashboardScreen({navigation}) {
                     </View>
                     <View style={{justifyContent: 'flex-start', paddingVertical: 20, paddingHorizontal: 10}}>
 
-                            <FondsLabel label='Cotisations' value={10000}/>
+                            <FondsLabel label='Cotisations' value={getAssociationCotisation().total}/>
                             <FondsLabel label='Invests'
-                                        value={5100} labelStyle={{color: defaultStyles.colors.orange}}
+                                        value={getManagedAssociationFund().investAmount} labelStyle={{color: defaultStyles.colors.orange}}
                                         valueStyle={{color: defaultStyles.colors.orange}}
                                         icon='credit-card-clock' iconColor={defaultStyles.colors.orange}/>
 
                             <FondsLabel label='Gains' labelStyle={{color: defaultStyles.colors.vert}}
-                                        value={1000} valueStyle={{color: defaultStyles.colors.vert}}
+                                        value={getManagedAssociationFund().gain} valueStyle={{color: defaultStyles.colors.vert}}
                                         icon='credit-card-plus' iconColor={defaultStyles.colors.vert}/>
                             <FondsLabel label='Depenses' labelStyle={{color: defaultStyles.colors.rougeBordeau}}
-                                        value={2000} valueStyle={{color: defaultStyles.colors.rougeBordeau}}
+                                        value={getManagedAssociationFund().depenseAmount} valueStyle={{color: defaultStyles.colors.rougeBordeau}}
                                         icon='credit-card-minus' iconColor={defaultStyles.colors.rougeBordeau}/>
 
                     </View>
@@ -190,14 +214,13 @@ function DashboardScreen({navigation}) {
                         <AppText style={styles.adhesion}
                                  onPress={() => navigation.navigate(routes.NEW_ADHESION)}>Nouvelle adhésion</AppText>
                     </View>
-                        <View style={styles.newAdhesionLenght}>
-                            <AppText style={{color: defaultStyles.colors.rougeBordeau}}>1</AppText>
-                        </View>
+                        {getNewAdhesion().length>0 && <View style={styles.newAdhesionLenght}>
+                            <AppText style={{color: defaultStyles.colors.rougeBordeau}}>{getNewAdhesion().length}</AppText>
+                        </View>}
                     </View>
                 </View>
                 <View style={styles.reglement}>
-                    <AppText >consulter </AppText>
-                    <AppText style={{color: defaultStyles.colors.bleuFbi}}> le reglement intérieur</AppText>
+                    <AppText style={{color: defaultStyles.colors.bleuFbi}}> Reglement intérieur</AppText>
                 </View>
             </ScrollView>
         </>
@@ -257,11 +280,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         justifyContent: 'center',
         alignItems: 'center',
-        right: -14,
+        left: '20%',
         top: -8,
       width: 20,
       height: 20,
       borderRadius:10,
+        backgroundColor: defaultStyles.colors.white
     },
     newAdhesionLenght: {
         alignItems: 'center',

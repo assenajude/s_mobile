@@ -1,20 +1,28 @@
 import React from 'react';
 import {View, StyleSheet, Image,  TouchableWithoutFeedback,} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
+import LottieView from "lottie-react-native";
 
 import AppText from "../AppText";
 import AppButton from "../AppButton";
 import defaultStyles from '../../utilities/styles'
 
 
-function AssociationItem({nom, sendAdhesionMessage,onPress, isMember, relationType, showState=true}) {
+function AssociationItem({association,sendAdhesionMessage,onPress, isMember, relationType, showState=true}) {
     return (
         <TouchableWithoutFeedback onPress={onPress}>
         <View style={{width: '50%'}}>
         <View style={styles.container}>
             <View style={{ alignItems: 'center'}}>
-                <Image style={styles.associationAvatar} source={require('../../../assets/peuple_solidaire.png')}/>
-                <AppText style={styles.nom}>{nom}</AppText>
+                <Image
+                    onLoad={() =>
+                        <LottieView
+                            source={require('../../../assets/animations/loading')}
+                            style={{height: 100, width: 100}}
+                        loop={true} autoPlay={true}/>}
+                    style={styles.associationAvatar}
+                    source={association.avatar?{uri: association.avatar} : require('../../../assets/peuple_solidaire.png')}/>
+                <AppText style={styles.nom}>{association.nom}</AppText>
             </View>
         </View>
             {showState && <View style={{

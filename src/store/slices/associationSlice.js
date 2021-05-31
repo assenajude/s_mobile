@@ -9,6 +9,7 @@ const associationSlice = createSlice({
         list: [],
         selectedAssociation: {},
         selectedAssociationMembers: [],
+        memberRoles: []
     },
     reducers: {
         associationRequested: (state) => {
@@ -37,6 +38,24 @@ const associationSlice = createSlice({
             state.loading = false
             state.error = null
             state.selectedAssociationMembers = action.payload
+        },
+        associationUpdated: (state, action) => {
+            state.loading = false
+            state.error = null
+            const updateIndex = state.list.findIndex(asso => asso.id === action.payload.id)
+            state.list[updateIndex] = action.payload
+            if(state.selectedAssociation.id === action.payload.id) state.selectedAssociation = action.payload
+        },
+        memberRolesReceived: (state, action) => {
+            state.loading = false
+            state.error = null
+            state.memberRoles = action.payload
+        },
+        rolesEdited: (state, action) => {
+            state.loading = false
+            state.error = null
+            const editedIndex = state.memberRoles.findIndex(item => item.id === action.payload.id)
+            state.memberRoles[editedIndex] = action.payload
         }
 
     }
@@ -44,7 +63,8 @@ const associationSlice = createSlice({
 
 const {associationAdded, associationReceived,
     associationRequested, associationRequestFailed,
-    selectedAssociationSet, associationMembersReceived} = associationSlice.actions
+    selectedAssociationSet, associationMembersReceived, memberRolesReceived,
+    rolesEdited, associationUpdated} = associationSlice.actions
 
 export default associationSlice.reducer
 
@@ -74,6 +94,31 @@ export const getSelectedAssociationMembers = (data) => apiRequested({
     method: 'post',
     onStart: associationRequested.type,
     onSuccess: associationMembersReceived.type,
+    onError: associationRequestFailed.type
+})
+export const getMemberRoles = (data) => apiRequested({
+    url:url+'/members/roles',
+    data,
+    method: 'post',
+    onStart: associationRequested.type,
+    onSuccess: memberRolesReceived.type,
+    onError: associationRequestFailed.type
+})
+
+export const getMemberRolesEdited = (data) => apiRequested({
+    url:url+'/editRoles',
+    data,
+    method: 'patch',
+    onStart: associationRequested.type,
+    onSuccess: rolesEdited.type,
+    onError: associationRequestFailed.type
+})
+export const getAvatarUpdate = (data) => apiRequested({
+    url:url+'/updateAvatar',
+    data,
+    method: 'patch',
+    onStart: associationRequested.type,
+    onSuccess: associationUpdated.type,
     onError: associationRequestFailed.type
 })
 

@@ -3,7 +3,7 @@ import colors from "./colors";
 
 export default {
     text: {
-        fontSize: 18,
+        fontSize: 15,
         fontFamily: Platform.OS === 'android'?'Roboto':'Avenir',
     },
     colors

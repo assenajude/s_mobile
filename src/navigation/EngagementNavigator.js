@@ -4,6 +4,7 @@ import EtatEngagementScreen from "../screens/EtatEngagementScreen";
 import defaultStyles from "../utilities/styles";
 import ListEngagementScreen from "../screens/ListEngagementScreen";
 import NewEngagementScreen from "../screens/NewEngagementScreen";
+import NewEngagementList from "../screens/NewEngagementList";
 
 const EngageNavig = createStackNavigator()
 
@@ -21,6 +22,9 @@ function EngagementNavigator(props) {
             }}/>
             <EngageNavig.Screen name='ListEngagementScreen' component={ListEngagementScreen} options={({route}) => ({
                 title: 'Engagements de '+route.params?.username,
+            })}/>
+            <EngageNavig.Screen name='NewEngagementList' component={NewEngagementList} options={({route}) => ({
+                title: 'Engagements en validation',
             })}/>
         </EngageNavig.Navigator>
     );

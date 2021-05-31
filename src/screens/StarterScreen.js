@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import {View, StyleSheet, TouchableWithoutFeedback, FlatList} from "react-native";
+import {MaterialCommunityIcons} from '@expo/vector-icons'
 import AppText from "../components/AppText";
 import {useDispatch, useSelector} from "react-redux";
 import {getAllMembers, getMemberAssociations} from "../store/slices/memberSlice";
@@ -11,7 +12,6 @@ import AppActivityIndicator from "../components/AppActivityIndicator";
 import defaultStyles from '../utilities/styles'
 import useAuth from "../hooks/useAuth";
 import ListItemSeparator from "../components/ListItemSeparator";
-import AppButton from "../components/AppButton";
 import useManageAssociation from "../hooks/useManageAssociation";
 
 function StarterScreen({navigation}) {
@@ -27,7 +27,7 @@ function StarterScreen({navigation}) {
         const isMember = getMemberRelationType(association).toLowerCase() === 'member'
         const isOnLeave = getMemberRelationType(association).toLowerCase() === 'onleave'
 
-        if(isMember || isOnLeave) {
+        if(isMember || isOnLeave || isAdmin()) {
         dispatch(getLoggedIn())
         dispatch(setSelectedAssociation(association))
         } else
@@ -46,18 +46,30 @@ function StarterScreen({navigation}) {
             {memberAssociations.length === 0 && !isLoading && <View style={styles.emptyStyle}>
                 <AppText>Vous n'appartenez à aucune association</AppText>
             </View>}
-               {isAdmin() && <View style={{
+           <View style={{
                     flexDirection:'row',
                     justifyContent: 'space-between',
                     padding:20
                 }}>
-                    <TouchableWithoutFeedback onPress={() => dispatch(getLoggedIn())}>
-                        <AppText style={{color: defaultStyles.colors.bleuFbi}}>Aller au menu</AppText>
+                    <TouchableWithoutFeedback onPress={() => navigation.navigate(routes.USER_COMPTE)}>
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center'
+                        }}>
+                            <MaterialCommunityIcons name='account' color={defaultStyles.colors.bleuFbi} size={24}/>
+                        <AppText style={{color: defaultStyles.colors.bleuFbi}}>Mon compte</AppText>
+                        </View>
                     </TouchableWithoutFeedback>
-                    <TouchableWithoutFeedback onPress={() => navigation.navigate(routes.ASSOCIATION_LIST)}>
-                        <AppText style={{color: defaultStyles.colors.bleuFbi}}>Adherer</AppText>
+                   <TouchableWithoutFeedback onPress={() => navigation.navigate(routes.ASSOCIATION_LIST)}>
+                       <View style={{
+                           flexDirection: 'row',
+                           alignItems: 'center'
+                       }}>
+                       <MaterialCommunityIcons name='account-group' color={defaultStyles.colors.bleuFbi} size={24}/>
+                       <AppText style={{color: defaultStyles.colors.bleuFbi}}>Adherer</AppText>
+                       </View>
                     </TouchableWithoutFeedback>
-                </View>}
+                </View>
                 <ListItemSeparator/>
             {memberAssociations.length > 0 &&
                 <FlatList
@@ -66,7 +78,7 @@ function StarterScreen({navigation}) {
                     numColumns={2}
                     renderItem={({item}) =>
                         <AssociationItem
-                            nom={item.nom}
+                            association={item}
                             relationType={getMemberRelationType(item)}
                             isMember={getAssociatonAllMembers(item)?.some(member => member.userId === currentUser.id)}
                             onPress={() => handleGoToDashboard(item)}
@@ -75,13 +87,18 @@ function StarterScreen({navigation}) {
                 />
             }
 
-            {!isAdmin() && <View style={{
+{/*            {!isAdmin() && <View style={{
                 paddingHorizontal: 20,
                 paddingVertical: 20
             }}>
                 <AppButton title='Adherer à une association'
+                           iconName='account-group'
                            onPress={() => navigation.navigate(routes.ASSOCIATION_LIST)}/>
-            </View>}
+                <AppButton title='Editer mon compte'
+                           iconName='account-arrow-right'
+                           onPress={() => navigation.navigate(routes.USER_COMPTE)}
+                         />
+            </View>}*/}
             </>
     );
 }

@@ -52,7 +52,8 @@ function ListAssociationScreen({navigation}) {
                 numColumns={2}
                 renderItem={({item}) =>
                     <AssociationItem
-                        nom={item.nom}
+                        association={item}
+                        onPress={() => navigation.navigate(routes.ASSOCIATION_DETAILS,item)}
                         sendAdhesionMessage={() => handleSendAdhesionMessage(item)}
                         isMember={getAssociatonAllMembers(item)?.some(member => member.userId === connectedMember.id)}
                         relationType={getMemberRelationType(item)}

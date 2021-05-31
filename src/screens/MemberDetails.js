@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, ScrollView, Image, StyleSheet, TouchableWithoutFeedback} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 
@@ -9,13 +9,21 @@ import BackgroundWithAvatar from "../components/member/BackgroundWithAvatar";
 import routes from "../navigation/routes";
 import useCotisation from "../hooks/useCotisation";
 import useEngagement from "../hooks/useEngagement";
+import useAuth from "../hooks/useAuth";
+import EditRolesModal from "../components/member/EditRolesModal";
 
 
 function MemberDetails({route, navigation}) {
     const selectedMember = route.params
+
+    const {isAdmin, isModerator} = useAuth()
     const {getMemberCotisations} = useCotisation()
     const {getMemberEngagementInfos} = useEngagement()
     const {formatFonds, formatDate} = useManageAssociation()
+
+    const [editRoles, setEditRoles] = useState(false)
+
+    const isAuthorized = isAdmin() || isModerator()
 
     useEffect(() => {
     }, [])
@@ -24,17 +32,21 @@ function MemberDetails({route, navigation}) {
         <>
         <ScrollView contentContainerStyle={{paddingBottom: 20}}>
 
-            <BackgroundWithAvatar
-                fondSource={require('../../assets/peuple_solidaire.png')}
-                memberUsername={selectedMember.username}
-                memberEmail={selectedMember.email}
-                memberAvatar={require('../../assets/user_avatar.jpg')} />
-            <TouchableWithoutFeedback
-                onPress={() => navigation.navigate(routes.NEW_MEMBER, selectedMember)}>
+
+            <BackgroundWithAvatar selectedMember={selectedMember}/>
+            {isAuthorized && <TouchableWithoutFeedback
+                onPress={() => navigation.navigate(routes.EDIT_MEMBER, selectedMember)}>
                 <View style={styles.editAccount}>
-                    <MaterialCommunityIcons name="account-edit" size={24} color="black" />
+                    <MaterialCommunityIcons name="account-edit" size={24} color={defaultStyles.colors.rougeBordeau} />
                 </View>
-            </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>}
+            {isAdmin() && <TouchableWithoutFeedback
+                onPress={() => setEditRoles(true)}>
+                <View style={[styles.editAccount, {flexDirection: 'row', top: 150}]}>
+                    <MaterialCommunityIcons name="account-edit" size={24} color={defaultStyles.colors.rougeBordeau} />
+                    <AppText style={{color: defaultStyles.colors.rougeBordeau}}>edit roles</AppText>
+                </View>
+            </TouchableWithoutFeedback>}
             <View style={styles.statut}>
                 <AppText style={{color: defaultStyles.colors.bleuFbi, fontSize: 20, fontWeight: 'bold'}}>{selectedMember.member.statut}</AppText>
             </View>
@@ -94,6 +106,9 @@ function MemberDetails({route, navigation}) {
                  </TouchableWithoutFeedback>
             </View>
         </ScrollView>
+            <EditRolesModal
+                editRoles={editRoles}
+                dismissModal={() => setEditRoles(false)}/>
         </>
     );
 }
@@ -116,7 +131,7 @@ const styles = StyleSheet.create({
     },
     editAccount: {
         position: 'absolute',
-        top: 220,
+        top: 200,
         right: 20,
     },
     statut: {

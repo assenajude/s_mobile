@@ -1,7 +1,7 @@
 import React from 'react';
 import {NavigationContainer} from "@react-navigation/native";
 import AuthNavigator from "./src/navigation/AuthNavigator";
-import MainNavigator from "./src/navigation/MainNavigator";
+import BottomTabNavigator from "./src/navigation/BottomTabNavigator";
 import {useSelector} from "react-redux";
 
 function AppWrapper(props) {
@@ -9,7 +9,7 @@ function AppWrapper(props) {
     return (
         <NavigationContainer>
             {!isLoggedIn && <AuthNavigator/>}
-            {isLoggedIn && <MainNavigator/>}
+            {isLoggedIn && <BottomTabNavigator/>}
         </NavigationContainer>
     );
 }

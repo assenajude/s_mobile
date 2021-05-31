@@ -1,5 +1,7 @@
-import React, {useState} from 'react';
-import { StyleSheet, ScrollView, View, Image} from "react-native";
+import React from 'react';
+import { StyleSheet, ScrollView, View} from "react-native";
+import {LinearGradient} from "expo-linear-gradient";
+
 import AppForm from "../components/form/AppForm";
 import AppFormField from "../components/form/AppFormField";
 import * as Yup from 'yup'
@@ -11,6 +13,7 @@ import defaultStyles from '../utilities/styles'
 import AppText from "../components/AppText";
 import routes from "../navigation/routes";
 import AppLogoInfo from "../components/AppLogoInfo";
+import GradientButton from "../components/GradientButton";
 
 const loginValidSchema = Yup.object().shape({
     info: Yup.string().required('Entrez votre adresse mail ou votre nom utilisateur'),
@@ -40,7 +43,7 @@ function LoginScreen({navigation}) {
                     password: userData.password
                 }
             }
-             await dispatch(signin(data))
+        await dispatch(signin(data))
               const error = store.getState().auth.error
               if(error !== null) return alert('error')
               resetForm()
@@ -53,7 +56,7 @@ function LoginScreen({navigation}) {
             <View style={styles.logoInfoContainer}>
                 <AppLogoInfo/>
             </View>
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView>
             <AppForm
                 initialValues={{
                     info: '',
@@ -67,36 +70,39 @@ function LoginScreen({navigation}) {
                     icon='account'
                     keyboardType='email-address'
                     placeholder='email ou username'
+                    returnKeyType='next'
+                    autoCapitalize='none'
                 />
                 <AppFormField
+                    autoCapitalize='none'
                     name='password'
                     icon='lock'
                     placeholder='password'
                     secureTextEntry
                 />
-                <FormSubmitButton title='envoyer'/>
+                <FormSubmitButton title='Envoyer' iconName='login'/>
             </AppForm>
-            <View style={{flexDirection: 'row'}}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: 20,
+                marginHorizontal: 40
+            }}>
                 <AppText>Vous n'avez pas de compte? </AppText>
                 <AppText
                     style={{color: defaultStyles.colors.bleuFbi}}
                     onPress={() => navigation.navigate(routes.REGISTER)}>Créez un</AppText>
             </View>
-
         </ScrollView>
         </>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      padding: 10
-    },
     logoInfoContainer: {
         alignSelf:'center',
-        width: '100%',
         alignItems: 'center',
-        marginBottom: 40
+        marginBottom: 40,
     }
 })
 export default LoginScreen;

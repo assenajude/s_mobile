@@ -9,21 +9,35 @@ import defaultStyles from '../utilities/styles'
 import ListItemSeparator from "../components/ListItemSeparator";
 import useCotisation from "../hooks/useCotisation";
 import useManageAssociation from "../hooks/useManageAssociation";
+import AppHeaderGradient from "../components/AppHeaderGradient";
 
 function EtatCotisationScreen({navigation}) {
     const {getMemberCotisations, checkCotisationUpToDate} = useCotisation()
     const {formatFonds, associationValidMembers} = useManageAssociation()
 
+    const error = useSelector(state => state.entities.cotisation.error)
+
     useEffect(() => {
     }, [])
+
+
+    if(associationValidMembers().length===0 && error === null) {
+        return <View style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: 'center'
+        }}>
+            <AppText>Aucune cotisation trouvée</AppText>
+        </View>
+    }
     return (
         <>
+            <AppHeaderGradient/>
             <FlatList data={associationValidMembers()}
                       keyExtractor={item => item.id.toString()}
                       ItemSeparatorComponent={ListItemSeparator}
                       renderItem={({item}) =>
-                          <MemberListItem memberAddress={item.email?item.email: item.phone}
-                              username={item.username?item.username:item.nom}
+                          <MemberListItem selectedMember={item}
                               getMemberDetails={() => navigation.navigate('MemberCotisationScreen',item)}>
                               <AppText style={{marginHorizontal: 10}}>({getMemberCotisations(item).cotisationLenght})</AppText>
                               <AppText style={{marginHorizontal: 10}}>{formatFonds(getMemberCotisations(item).totalCotisation)}</AppText>

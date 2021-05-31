@@ -1,25 +1,26 @@
 import React from 'react';
 import {createStackNavigator} from "@react-navigation/stack";
-import CompteScreen from "../screens/CompteScreen";
+import MemberCompteScreen from "../screens/MemberCompteScreen";
 import defaultStyles from "../utilities/styles";
 import EditMemberImageScreen from "../screens/EditMemberImageScreen";
 import AppText from "../components/AppText";
 import {View, TouchableOpacity} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
-import {getLogout} from "../store/slices/authSlice";
 import {useDispatch} from "react-redux";
+import {getLogout} from "../store/slices/authSlice";
 
-const CompteNavig = createStackNavigator()
+const MemberCompteNavig = createStackNavigator()
 
-function CompteNavigator(props) {
+function MemberCompteNavigator({navigation}) {
     const dispatch = useDispatch()
 
     const handleLogout = () => {
         dispatch(getLogout())
+        // navigation.navigate('AuthNavigator')
     }
 
     return (
-        <CompteNavig.Navigator screenOptions={() => ({
+        <MemberCompteNavig.Navigator screenOptions={() => ({
             headerStyle: {backgroundColor: defaultStyles.colors.rougeBordeau},
             headerTintColor: defaultStyles.colors.white,
             headerRight: () =>
@@ -31,12 +32,12 @@ function CompteNavigator(props) {
                 </TouchableOpacity>
 
         })}>
-            <CompteNavig.Screen name='Compte' component={CompteScreen}/>
-            <CompteNavig.Screen name='EditImage' component={EditMemberImageScreen} options={{
+            <MemberCompteNavig.Screen name='Compte' component={MemberCompteScreen}/>
+            <MemberCompteNavig.Screen name='EditImage' component={EditMemberImageScreen} options={{
                 title: 'Editeur de profile'
             }}/>
-        </CompteNavig.Navigator>
+        </MemberCompteNavig.Navigator>
     );
 }
 
-export default CompteNavigator;
+export default MemberCompteNavigator;

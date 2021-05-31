@@ -8,7 +8,7 @@ function AppLinkButton({onPress, label, labelLength, totalAmount}) {
     const {formatFonds} = useManageAssociation()
     return (
         <TouchableWithoutFeedback onPress={onPress}>
-            <View style={styles.container}>
+            <View style={styles.container} elevation={10}>
                 <View>
                     <AppText style={styles.linkText}>{label}</AppText>
                 </View>

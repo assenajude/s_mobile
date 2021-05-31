@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Modal, TouchableOpacity, StyleSheet, FlatList, Image, TouchableWithoutFeedback} from "react-native";
+import {View, Modal, TouchableOpacity, StyleSheet, FlatList} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import defaultStyles from '../../utilities/styles'
 import AssociationItem from "./AssociationItem";
@@ -28,6 +28,7 @@ function AssociationModal({visible, closeModal, associations, selectAssociation}
                           numColumns={2}
                           renderItem={({item}) =>
                               <AssociationItem
+                                  association={item}
                                   nom={item.nom} showState={false}
                                   onPress={() => selectAssociation(item)}/>}
                 />

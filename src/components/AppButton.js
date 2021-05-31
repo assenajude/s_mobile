@@ -1,12 +1,24 @@
 import React from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from "react-native";
+import {MaterialCommunityIcons} from "@expo/vector-icons"
 import colors from "../utilities/colors";
+import {LinearGradient} from "expo-linear-gradient";
 
-function AppButton({title, otherButtonStyle, textStyle, onPress}) {
+function AppButton({title, otherButtonStyle, textStyle,iconName,iconSize=30,iconColor='white', onPress}) {
     return (
+        <LinearGradient
+            colors={['#4c669f', '#3b5998', '#192f6a']}
+            style={[styles.buttonStyle, otherButtonStyle]}>
         <TouchableOpacity style={[styles.buttonStyle, otherButtonStyle]} onPress={onPress}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center'
+            }}>
+                {iconName && <MaterialCommunityIcons name={iconName} size={iconSize} color={iconColor}/>}
                 <Text style={[styles.textStyle, textStyle]}>{title}</Text>
+            </View>
         </TouchableOpacity>
+        </LinearGradient>
     );
 }
 
@@ -14,7 +26,6 @@ const styles = StyleSheet.create({
     buttonStyle: {
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors.bleuFbi,
         height: 50,
         marginVertical: 10,
         width: '100%',
@@ -22,7 +33,8 @@ const styles = StyleSheet.create({
     },
     textStyle: {
         color: colors.white,
-        fontSize: 18
+        fontSize: 18,
+        marginLeft: 5
     }
 })
 export default AppButton;

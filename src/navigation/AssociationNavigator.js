@@ -18,7 +18,7 @@ function AssociationNavigator(props) {
     const [associationModalVisible, setAssociationModalVisible] = useState(false)
     const memberAssociations = useSelector(state => {
         const list = state.entities.member.memberAssociations
-        const validList = list.filter(ass => ass.associated_member?.relation.toLowerCase() === 'valid')
+        const validList = list.filter(ass => ass.member?.relation.toLowerCase() === 'member')
         return validList
     })
 
@@ -27,7 +27,6 @@ function AssociationNavigator(props) {
     }
 
     const handleSelectAssociation = (item) => {
-        console.log(item)
         setAssociationModalVisible(false)
     }
 

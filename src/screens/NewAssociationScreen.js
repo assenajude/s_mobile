@@ -1,55 +1,111 @@
-import React from 'react';
-import {ScrollView} from "react-native";
+import React, {useState} from 'react';
+import {ScrollView, Alert} from "react-native";
 import * as Yup from 'yup'
 import {AppForm, AppFormField, FormSubmitButton} from '../components/form'
 import {addNewAssociation} from "../store/slices/associationSlice";
 import {useDispatch, useStore} from "react-redux";
+import FormImagePicker from "../components/form/FormImagePicker";
+import AppUploadModal from "../components/AppUploadModal";
+import useUploadImage from "../hooks/useUploadImage";
 
 const newAssociationValidSchema = Yup.object().shape({
     nom: Yup.string(),
     decription: Yup.string(),
     cotisationMensuelle: Yup.number(),
     frequenceCotisation: Yup.string(),
-    fonds: Yup.number(),
-    interetCredit: Yup.number()
+    fondInitial: Yup.number(),
+    seuilSecurite: Yup.number(),
+    interetCredit: Yup.number(),
+    avatar: Yup.object()
 })
-function NewAssociationScreen({navigation}) {
+function NewAssociationScreen({navigation, route}) {
+    const selectedAssociation = route.params
+
+    const {directUpload, dataTransformer} = useUploadImage()
     const store = useStore()
     const dispatch = useDispatch()
 
+    const [progress, setProgresss] = useState(0)
+    const [uploadModal, setUploadModal] = useState(false)
+
     const handleNewAssociation = async(data) => {
-        await dispatch(addNewAssociation(data))
+        const transmedArray = dataTransformer([data.avatar])
+        setProgresss(0)
+        setUploadModal(true)
+        const result = await directUpload(transmedArray, [data.avatar], (progress) => {
+            setProgresss(progress)
+        })
+        setUploadModal(false)
+        let newData = {}
+        if(!result) {
+           Alert.alert("Erreur", "Les images n'ont pas été telechargées, voulez-vous continuer?",
+               [{text: 'oui', onPress: () => {
+                       newData = {
+                           nom:data.nom,
+                           avatar: '',
+                           description: data.description,
+                           cotisationMensuelle: data.cotisationMensuelle,
+                           frequenceCotisation: data.frequenceCotisation,
+                           fondInitial: data.fondInitial,
+                           seuilSecurite: data.seuilSecurite,
+                           interetCredit: data.interetCredit
+                       }
+                   }}, {text: 'non', onPress: () => {
+                       return;
+                   }}])
+        }
+        const signedArray = store.getState().uploadImage.signedRequestArray
+        const avatarUrl = signedArray[0].url
+        newData = {
+            nom:data.nom,
+            avatar: avatarUrl,
+            description: data.description,
+            cotisationMensuelle: data.cotisationMensuelle,
+            frequenceCotisation: data.frequenceCotisation,
+            fondInitial: data.fondInitial,
+            seuilSecurite: data.seuilSecurite,
+            interetCredit: data.interetCredit
+        }
+        await dispatch(addNewAssociation(newData))
         const error = store.getState().entities.association.error
         if(error !== null) return alert('error adding new association')
+        alert("success!!!")
         navigation.goBack()
     }
     return (
+        <>
         <ScrollView
             contentContainerStyle={{
                 padding: 10
             }}>
             <AppForm
                 initialValues={{
-                    nom: '',
-                    description: '',
-                    cotisationMensuelle: '',
-                    frequenceCotisation: '',
-                    fonds: '',
-                    interetCredit: ''
+                    avatar: selectedAssociation?{url: selectedAssociation.avatar}: {},
+                    nom:selectedAssociation?selectedAssociation.nom : '',
+                    description:selectedAssociation?selectedAssociation.description : '',
+                    cotisationMensuelle:selectedAssociation?String(selectedAssociation.cotisationMensuelle) : '',
+                    frequenceCotisation: selectedAssociation?selectedAssociation.frequenceCotisation : '',
+                    fondInitial: selectedAssociation?String(selectedAssociation.fondInitial) : '',
+                    seuilSecurite: selectedAssociation?String(selectedAssociation.seuilSecurite) : '',
+                    interetCredit: selectedAssociation?String(selectedAssociation.interetCredit) : ''
                 }}
                 validationSchema={newAssociationValidSchema}
                 onSubmit={handleNewAssociation}
             >
+                <FormImagePicker name='avatar'/>
                 <AppFormField name='nom' placeholder='nom'/>
                 <AppFormField name='description' placeholder='description'/>
                 <AppFormField name='cotisationMensuelle' placeholder='cotisation mensuelle'/>
                 <AppFormField name='frequenceCotisation' placeholder='frequence cotisation'/>
-                <AppFormField name='fonds' placeholder='fonds initial'/>
+                <AppFormField name='fondInitial' placeholder='fonds initial'/>
+                <AppFormField name='seuilSecurite' placeholder='Seuil de securité'/>
                 <AppFormField name='interetCredit' placeholder='taux de credit
                 '/>
                 <FormSubmitButton title='Ajouter'/>
             </AppForm>
         </ScrollView>
+            <AppUploadModal progress={progress} uploadModalVisible={uploadModal}/>
+            </>
     );
 }
 

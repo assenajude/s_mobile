@@ -1,63 +1,117 @@
-import React from 'react';
-import {View, TouchableOpacity, StyleSheet} from "react-native";
-import dayjs from "dayjs";
+import React, {useState, useRef} from 'react';
+import {View, TouchableOpacity, StyleSheet, TouchableWithoutFeedback} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import AppText from "../AppText";
 import useManageAssociation from "../../hooks/useManageAssociation";
 import MemberItem from "../member/MemberItem";
 import defaultStyles from '../../utilities/styles'
+import VoteItem from "../vote/VoteItem";
+import AppSimpleLabelWithValue from "../AppSimpleLabelWithValue";
+import TrancheItem from "../tranche/trancheItem";
+import {getPayingTranche} from "../../store/slices/engagementSlice";
+import {useDispatch} from "react-redux";
+import TrancheRightActions from "../tranche/TrancheRightActions";
 
 
-function EngagementItem({label, montant, getEngagementDetails, memberAvatar, memberUsername,
-                            memberAddress, engagementDetails, statutEngagement,demandDate,
-                            validationDate,echeanceDate, showAvatar=true, inList=false}) {
-    const {formatFonds} = useManageAssociation()
+function EngagementItem({getEngagementDetails,getMembersDatails,selectedMember,engagement,tranches,renderRightActions,
+                            engagementDetails, handleVoteUp, handleVoteDown, showAvatar=true, inList=false,
+                            allVoted, downVotes, upVotes, isVoting, validationDate, showTranches, getTranchesShown,
+                            handlePayTranche, onChangeTrancheMontant, editTrancheMontant}) {
+
+    const dispatch = useDispatch()
+    const {formatFonds, formatDate} = useManageAssociation()
+
     return (
         <>
-        <TouchableOpacity onPress={getEngagementDetails}>
+
             <View style={styles.container}>
-                <AppText numberOfLines={2} style={{width: '80%', fontWeight: 'bold'}}>{label}</AppText>
+                <AppText numberOfLines={2} style={{width: '50%', fontWeight: 'bold'}}>{engagement.libelle}</AppText>
                 <View style={styles.montant}>
-                    <AppText style={{fontSize: 15, fontWeight: 'bold'}}>{formatFonds(montant)}</AppText>
+                    <AppText style={{fontSize: 15, fontWeight: 'bold'}}>{formatFonds(engagement.montant)}</AppText>
                 </View>
                 {inList && !engagementDetails && <View>
                     <AppText style={{color: defaultStyles.colors.bleuFbi}}> + Details</AppText>
                 </View>}
                 {engagementDetails && <View>
-                    <View style={styles.detail}>
-                        <AppText style={styles.label}>Statut</AppText>
-                        <AppText>{statutEngagement}</AppText>
+                    <View style={{
+                        backgroundColor: defaultStyles.colors.bleuFbi,
+                        alignItems: 'center',
+                        marginVertical: 10
+                    }}>
+                        <AppText style={{color: defaultStyles.colors.white}}>Details</AppText>
                     </View>
-                    <View style={styles.detail}>
-                        <AppText style={styles.label}>Date demande</AppText>
-                        <AppText>{dayjs(demandDate).format('DD/MM/YYYY HH:mm:ss')}</AppText>
-                    </View>
-                    <View style={styles.detail}>
-                        <AppText style={styles.label}>Date validation</AppText>
-                        <AppText>{dayjs(validationDate).format('DD/MM/YYYY HH:mm:ss')}</AppText>
-                    </View>
-                    <View style={styles.detail}>
-                        <AppText style={styles.label}>Date échéance</AppText>
-                        <AppText>{dayjs(echeanceDate).format('DD/MM/YYYY HH:mm:ss')}</AppText>
+                    <AppSimpleLabelWithValue label='Montant demandée' labelValue={formatFonds(engagement.montant)}/>
+                    <AppSimpleLabelWithValue label='Montant Interet' labelValue={formatFonds(engagement.interetMontant)}/>
+                    <AppSimpleLabelWithValue label='Total à rembourser' labelValue={formatFonds(engagement.montant+engagement.interetMontant)}/>
+                    <AppSimpleLabelWithValue label='Date demande' labelValue={formatDate(engagement.createdAt)}/>
+                    {validationDate && <AppSimpleLabelWithValue label='Date Validation' labelValue={formatDate(validationDate)}/>}
+                    <AppSimpleLabelWithValue label='Date écheance' labelValue={formatDate(engagement.echeance)}/>
+                    <View>
+                        <View style={styles.trancheIcon}>
+                            <TouchableOpacity onPress={getTranchesShown}>
+                                {!showTranches && <MaterialCommunityIcons name="plus" size={24} color="black" />}
+                                {showTranches && <MaterialCommunityIcons name="minus" size={24} color="black" />}
+                            </TouchableOpacity>
+                            <AppText style={{marginLeft: 10, color: defaultStyles.colors.bleuFbi}}>Tranches({tranches.length})</AppText>
+                        </View>
+                        {showTranches && <View style={styles.trancheContainer}>
+                        {tranches.length > 0 && <View style={{
+                            marginHorizontal: 20,
+                            alignItems: 'center'
+                        }}>
+                            {tranches.map((item,index)=>
+                                <TrancheItem
+                                    handlePayTranche={() => handlePayTranche(item)}
+                                    renderRightActions={() => renderRightActions(item)}
+                                    trancheEditMontant={editTrancheMontant}
+                                    onChangeTrancheMontant={onChangeTrancheMontant}
+                                    payingTranche={item.paying}
+                                    payTranche={() => {
+                                        dispatch(getPayingTranche(item))
+                                    }}
+                                    key={item.id.toString()}
+                                    numero={index+1}
+                                    payed={item.solde}
+                                    toPay={item.montant}
+                                    datePayement={item.montant === item.solde?item.updatedAt:item.echeance} />
+                                    )}
+
+                        </View>}
+                        {tranches.length === 0 && <AppText>aucune tranche de payement</AppText>}
+                    </View>}
                     </View>
                     <View style={{
-                        alignItems: 'flex-end',
-                        marginRight: 20
+                        alignItems: 'center',
+                        marginRight: 20,
+                        width: 60,
+                        paddingHorizontal: 15,
+                        alignSelf: 'flex-end',
+                        backgroundColor: defaultStyles.colors.white
                     }}>
-                    <MaterialCommunityIcons name="chevron-up" size={30} color={defaultStyles.colors.dark} />
+                        <TouchableOpacity onPress={getEngagementDetails}>
+                            <MaterialCommunityIcons name="chevron-up" size={30} color={defaultStyles.colors.dark} />
+                        </TouchableOpacity>
                     </View>
                 </View>}
                 {showAvatar && <View style={styles.avatarContainer}>
                     <AppText style={{margin: 10, color: defaultStyles.colors.grey}}>Par</AppText>
-                    <MemberItem avatarStyle={styles.avatar} username={memberUsername}
-                                avatarSource={memberAvatar} address={memberAddress}/>
+                    <MemberItem avatarStyle={styles.avatar} selectedMember={selectedMember} getMemberDetails={getMembersDatails}/>
                 </View>}
                 <View style={styles.icon}>
-                    {!engagementDetails && <MaterialCommunityIcons name="chevron-down" size={24} color={defaultStyles.colors.dark} />}
-
+                    {!engagementDetails &&
+                    <TouchableOpacity onPress={getEngagementDetails}>
+                        <MaterialCommunityIcons name="chevron-down" size={30} color={defaultStyles.colors.dark} />
+                    </TouchableOpacity>
+                    }
                 </View>
             </View>
-        </TouchableOpacity>
+            {isVoting && <VoteItem
+                downVotes={downVotes}
+                upVotes={upVotes}
+                allVoted={allVoted}
+                handleVoteDown={handleVoteDown}
+                handleVoteUp={handleVoteUp}
+            />}
             </>
     );
 }
@@ -74,8 +128,9 @@ const styles = StyleSheet.create({
         marginVertical: 10
     },
     container: {
+        paddingHorizontal: 10,
         marginVertical: 20,
-        paddingHorizontal: 10
+        marginTop: 10
     },
     detail:{
         flexDirection: 'row',
@@ -87,7 +142,9 @@ const styles = StyleSheet.create({
     icon: {
       position: 'absolute',
       right: 40,
-      top: 40
+      top: 40,
+        backgroundColor: defaultStyles.colors.white,
+        paddingHorizontal: 10
     },
     label: {
       fontWeight: '900'
@@ -96,6 +153,24 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 20,
         top: 10
+    },
+    trancheContainer: {
+        borderWidth: 1,
+        minHeight: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 20
+    },
+    trancheIcon: {
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    voteContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        marginHorizontal: 20,
+        marginTop: 20,
     }
 })
 export default EngagementItem;

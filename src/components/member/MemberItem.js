@@ -3,15 +3,22 @@ import {View, StyleSheet, TouchableWithoutFeedback} from "react-native";
 import AppText from "../AppText";
 import defaultStyles from '../../utilities/styles'
 import AppAvatar from "../AppAvatar";
+import {useSelector} from "react-redux";
 
-function MemberItem({username, getMemberDetails, avatarStyle, address}) {
+function MemberItem({getMemberDetails, avatarStyle, selectedMember,deleteAvatar}) {
+    const connectedMember = useSelector(state => {
+        const connectedUser = state.auth.user
+        const list = state.entities.association.selectedAssociationMembers
+        const selected = list.find(item => item.id === connectedUser.id)
+        return selected
+    })
     return (
         <TouchableWithoutFeedback onPress={getMemberDetails}>
         <View style={styles.container}>
-            <AppAvatar avatarStyle={avatarStyle}/>
+            <AppAvatar source={{uri: selectedMember.member.avatar}} avatarStyle={avatarStyle} onDelete={deleteAvatar}/>
             <View style={styles.addressContainer}>
-                <AppText style={styles.addressText}>{username}</AppText>
-                <AppText style={styles.addressText}>{address}</AppText>
+                <AppText style={styles.addressText}>{selectedMember.username}</AppText>
+                <AppText style={styles.addressText}>{selectedMember.email?selectedMember.email:selectedMember.phone}</AppText>
             </View>
         </View>
         </TouchableWithoutFeedback>

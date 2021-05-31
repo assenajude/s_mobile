@@ -3,9 +3,12 @@ import {View, Text, ImageBackground, StyleSheet} from "react-native";
 import AppButton from "../components/AppButton";
 import colors from "../utilities/colors";
 import routes from "../navigation/routes";
+import AppHeaderGradient from "../components/AppHeaderGradient";
 
 function WelcomeScreen({navigation}) {
     return (
+        <>
+            <AppHeaderGradient/>
         <ImageBackground blurRadius={1} style={styles.container} source={require('../../assets/solidariteImg.jpg')}>
             <View style={styles.buttonStyle}>
                 <AppButton title='Se connecter' onPress={() => navigation.navigate(routes.LOGIN)}/>
@@ -13,6 +16,7 @@ function WelcomeScreen({navigation}) {
                            title='Créer un compte' onPress={() => navigation.navigate(routes.REGISTER)}/>
             </View>
         </ImageBackground>
+    </>
     );
 }
 

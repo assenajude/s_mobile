@@ -7,7 +7,7 @@ function AppLabelWithValue({label, value, showLimit=true}) {
     return (
         <View>
             <View style={styles.detailContainer}>
-                <AppText style={{fontWeight: '900'}}>{label}</AppText>
+                <AppText style={{fontWeight: 'bold'}}>{label}</AppText>
             </View>
             <View style={{
                 alignItems: 'center'

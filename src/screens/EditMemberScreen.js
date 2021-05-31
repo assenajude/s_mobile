@@ -9,11 +9,10 @@ import AppTimePicker from "../components/AppTimePicker";
 
 const validMember = Yup.object().shape({
     statut: Yup.string(),
-    fonds: Yup.number(),
     relation: Yup.string(),
     adhesionDate: Yup.date()
 })
-function NewMemberScreen({route, navigation}) {
+function EditMemberScreen({route, navigation}) {
     const store = useStore()
     const selectEdited = route.params
     const dispatch = useDispatch()
@@ -49,7 +48,6 @@ function NewMemberScreen({route, navigation}) {
 
 
     useEffect(() => {
-        console.log(selectEdited);
     }, [])
 
     return (
@@ -57,7 +55,6 @@ function NewMemberScreen({route, navigation}) {
             <AppForm
                 initialValues={{
                     statut: selectEdited? selectEdited.member.statut : '',
-                    fonds: selectEdited?String(selectEdited.member.fonds) : '',
                     relation: selectEdited?selectEdited.member.relation: '',
                     adhesionDate: selectEdited?selectEdited.adhesionDate:new Date()
                 }}
@@ -65,7 +62,6 @@ function NewMemberScreen({route, navigation}) {
                 onSubmit={handleAddMember}
             >
                 <AppFormField name='statut' placeholder='statut'/>
-                <AppFormField name='fonds' placeholder='fonds de depart'/>
                 <AppFormField name='relation' placeholder='type relation'/>
                 <AppTimePicker label='date adhesion' name='adhesionDate'/>
                 <FormSubmitButton title='Ajouter'/>
@@ -74,4 +70,4 @@ function NewMemberScreen({route, navigation}) {
     );
 }
 
-export default NewMemberScreen;
+export default EditMemberScreen;

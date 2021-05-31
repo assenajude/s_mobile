@@ -1,18 +1,31 @@
-import React from 'react';
-import {Image, View, StyleSheet} from "react-native";
-import AppText from "../AppText";
+import React, {useState} from 'react';
+import {Image, View, StyleSheet, TouchableWithoutFeedback} from "react-native";
+import {LinearGradient} from "expo-linear-gradient";
+import {MaterialCommunityIcons} from "@expo/vector-icons";
+import defaultStyles from "../../utilities/styles";
+import MemberItem from "./MemberItem";
+import AppImagePicker from "../AppImagePicker";
+import AppCamera from "../AppCamera";
 
-function BackgroundWithAvatar({fondSource, memberUsername, memberEmail, memberAvatar}) {
+function BackgroundWithAvatar({getCompteDetails, fondStyle, selectedMember,onChangeImages, avatarStyle, showCamera}) {
+    
     return (
         <View>
-            <Image style={styles.fontImage} source={fondSource}/>
-            <View style={styles.cameraContainer}>
-                <View style={styles.mainInfo}>
-                    <AppText style={{fontWeight: 'bold'}}>{memberUsername}</AppText>
-                    <AppText>{memberEmail}</AppText>
-                </View>
-            </View>
-            <Image style={styles.avatar} source={memberAvatar}/>
+            {!selectedMember.member.backImage && <LinearGradient
+                colors={['#860432', 'transparent']}
+                style={styles.background}
+            />}
+            {selectedMember.member.backImage && <Image
+                style={[styles.fontImage, fondStyle]}
+                source={{uri: selectedMember.member.backImage}}/>}
+            <MemberItem selectedMember={selectedMember} avatarStyle={avatarStyle} getMemberDetails={getCompteDetails}/>
+            {showCamera &&
+                <AppCamera
+                    onPress={onChangeImages}
+                    iconSize={20}
+                    cameraStyle={{width:40, height: 40}}
+                    cameraContainer={styles.camera}/>
+            }
         </View>
     );
 }
@@ -25,12 +38,23 @@ const styles = StyleSheet.create({
         left: 30,
         width: 60
     },
+    background: {
+        height: 100,
+        width: '100%',
+    },
     cameraContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
+    camera: {
+        position: 'absolute',
+        right: 10,
+        bottom: 25,
+        height: 50,
+        width: 50
+    },
     fontImage: {
-        height: 200
+        height: 150
     },
     mainInfo: {
         marginLeft:'25%',

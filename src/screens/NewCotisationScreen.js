@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
-import {ScrollView} from "react-native";
+import {ScrollView, ToastAndroid} from "react-native";
 import * as Yup from 'yup'
 
 import {AppForm, AppFormField, FormSubmitButton} from "../components/form";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch, useSelector, useStore} from "react-redux";
 import {addNewCotisation} from "../store/slices/cotisationSlice";
 import useCotisation from "../hooks/useCotisation";
 import AppTimePicker from "../components/AppTimePicker";
@@ -15,6 +15,7 @@ const validCotisation = Yup.object().shape({
 })
 
 function NewCotisationScreen(props) {
+    const store = useStore()
     const dispatch = useDispatch()
     const {getMonthString} = useCotisation()
 
@@ -35,15 +36,37 @@ function NewCotisationScreen(props) {
     })
 
 
-    const handleAddCotisation = (cotisation) => {
+    const handleAddCotisation = async (cotisation, {resetForm}) => {
+        if(currentUser.wallet<cotisation.montant) {
+            return alert("Vous n'avez pas de fonds suffisant pour faire votre cotisation")
+        }
         const datePay = cotisation.datePayement.getTime()
             const data = {
                 montant: cotisation.montant,
                 motif: cotisation.motif,
                 datePayement: datePay,
                 memberId: selectedMember.member.id,
-                associationId: selectedAssociation.id}
-            dispatch(addNewCotisation(data))
+                associationId: selectedAssociation.id,
+        }
+            await dispatch(addNewCotisation(data))
+
+        const error = store.getState().entities.engagement.error
+        if(error !== null) {
+            ToastAndroid.showWithGravityAndOffset("Erreur: Impossible de valider la cotisation",
+                ToastAndroid.LONG,
+                ToastAndroid.BOTTOM,
+                100,
+                500
+            )
+            return;
+        }
+        ToastAndroid.showWithGravityAndOffset("Succès: cotisation payée",
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            100,
+            500
+        )
+        resetForm()
     }
 
 

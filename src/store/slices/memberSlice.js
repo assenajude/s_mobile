@@ -53,6 +53,10 @@ const memberSlice = createSlice({
             state.error = null
             const infos = action.payload
             state.memberInfos = infos
+        },
+        imagesEdited: (state, action) => {
+            state.loading = false
+            state.error = null
         }
 
     }
@@ -123,5 +127,23 @@ export const sendAdhesionMessage = (data) => apiRequested({
     method: 'patch',
     onStart: memberRequested.type,
     onSuccess: allMembersReceived.type,
+    onError: memberRequestFailed.type
+})
+
+export const respondToAdhesionMessage = (data) => apiRequested({
+    url: url+'/respondToAdhesionMessage',
+    data,
+    method: 'patch',
+    onStart: memberRequested.type,
+    onSuccess: updateOne.type,
+    onError: memberRequestFailed.type
+})
+
+export const getImagesEdit = (data) => apiRequested({
+    url: url+'/editImages',
+    data,
+    method: 'patch',
+    onStart: memberRequested.type,
+    onSuccess: updateOne.type,
     onError: memberRequestFailed.type
 })

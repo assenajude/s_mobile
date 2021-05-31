@@ -11,7 +11,7 @@ function AppActivityIndicator({visible}) {
         return (
             <View style={styles.container}>
                 <LottieView style={{ width: 200}} autoPlay={true} loop={true} source={require('../../assets/animations/loading')}/>
-                <ActivityIndicator size='large' color={colors.rougeBordeau}/>
+                {/*<ActivityIndicator size='large' color={colors.rougeBordeau}/>*/}
             </View>
         );
     }

@@ -1,15 +1,23 @@
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector, useStore} from "react-redux";
+import {ToastAndroid} from "react-native";
+import {getTranchePayed} from "../store/slices/engagementSlice";
 
 let useEngagement;
 export default useEngagement = () => {
+    const store = useStore()
+    const dispatch = useDispatch()
+    const currentUser = useSelector(state => state.auth.user)
     const listEngagement = useSelector(state => state.entities.engagement.list)
+    const votingData = useSelector(state => state.entities.engagement.votesList)
 
     const getMemberEngagementInfos = (member) => {
         let engagementLength = 0
         let engagementAmount = 0
-        const memberEngagements = listEngagement.filter(item => item.memberId === member.member.id)
-         engagementLength = memberEngagements.length
-        memberEngagements.forEach(engage => {
+        const memberEngagements = listEngagement.filter(item => item.creatorId === member.member.id)
+        const memberValidEngagements = memberEngagements.filter(engage => engage.accord === true)
+
+         engagementLength = memberValidEngagements.length
+        memberValidEngagements.forEach(engage => {
             engagementAmount += engage.montant
         })
         return {engagementLength, engagementAmount}
@@ -17,11 +25,47 @@ export default useEngagement = () => {
 
     const getAssociationEngagementTotal = () => {
         let total = 0
-        const engagementLenght = listEngagement.length
-        listEngagement.forEach(engage => {
+        const validList = listEngagement.filter(engage => engage.accord === true)
+        const engagementLenght = validList.length
+        validList.forEach(engage => {
             total += engage.montant
         })
         return {total, engagementLenght}
     }
-    return {getMemberEngagementInfos, getAssociationEngagementTotal}
+
+    const getEngagementVotesdData = (engagement) => {
+        let upVotes = 0
+        let downVotes = 0
+        const engagementVotes = votingData[engagement.id]
+        if(engagementVotes && engagementVotes.length>0) {
+        engagementVotes.forEach(item => {
+            if(item.vote.typeVote.toLowerCase() === 'up') upVotes +=1
+            else downVotes += 1
+        })
+        }
+        return {upVotes, downVotes}
+    }
+
+
+    const handlePayTranche = async (trancheId, engagementId, montant) => {
+        if(currentUser.wallet<montant) {
+            return alert("Vous n'avez pas de fonds suffisant pour effectuer le payement.")
+        }
+        const data = {
+            id: trancheId,
+            montant,
+            engagementId,
+            userId: currentUser.id
+        }
+        await dispatch(getTranchePayed(data))
+        const error = store.getState().entities.engagement.error
+        if(error !== null) {
+            return alert("Impossible de procceder au payement, une erreur est apparue. Veuillez reessayer plutard.")
+        }
+        ToastAndroid.showWithGravity("Le payement a été effectué avec succès",
+            ToastAndroid.CENTER,
+            ToastAndroid.LONG)
+    }
+
+    return {getMemberEngagementInfos, getAssociationEngagementTotal, getEngagementVotesdData, handlePayTranche}
 }

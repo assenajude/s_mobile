@@ -1,6 +1,7 @@
 export default {
+    gradient: 'rgba(0,0,0,0.8)',
     orange: 'orange',
-    white: '#fff',
+    white: '#ffffff',
     black:'#000',
     vert: 'green',
     grey: 'grey',

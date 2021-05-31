@@ -1,6 +1,5 @@
 import apiClient from "../../api/http-common";
 import * as actions from '../actionsCreators/apiActionCreator'
-import {useStore} from "react-redux";
 
 const api = store => next => async action => {
     if(action.type !== actions.apiRequested.type) return next (action)
@@ -8,7 +7,7 @@ const api = store => next => async action => {
     if(onStart) store.dispatch({type: onStart})
     next(action)
     try {
-        const authToken = store.getState().auth.user.accessToken
+        const authToken = store.getState().auth.token
         const response = await apiClient.axiosInstance.request({
         url,
         data,

@@ -9,6 +9,7 @@ import useManageAssociation from "../hooks/useManageAssociation";
 import {readMemberInfos} from "../store/slices/memberSlice";
 import useInfo from "../hooks/useInfo";
 import {showInfoDetails} from "../store/slices/informationSlice";
+import AppText from "../components/AppText";
 
 function NewsScreen({navigation}) {
     const dispatch = useDispatch()
@@ -21,6 +22,7 @@ function NewsScreen({navigation}) {
         return selectedList
     })
     const infos = useSelector(state => state.entities.information.list)
+    const error = useSelector(state => state.entities.information.error)
 
     const handleReadInfo = (info) => {
         const infoState = getMemberInfoState(info)
@@ -37,9 +39,18 @@ function NewsScreen({navigation}) {
         dispatch(readMemberInfos(data))
     }
 
+
+
     return (
         <>
-            <FlatList
+           {infos.length === 0 && error === null && <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: "center"
+            }}>
+                <AppText>Aucune info trouvée</AppText>
+            </View>}
+            {infos.length>0 && <FlatList
                 data={infos}
                 keyExtractor={item => item.id.toString()}
                 ItemSeparatorComponent={ListItemSeparator}
@@ -53,7 +64,7 @@ function NewsScreen({navigation}) {
                         dateDebut={item.dateDebut}
                         dateFin={item.dateFin}
                     />}
-            />
+            />}
             <View style={styles.addNew}>
                 <AppAddNewButton onPress={() => navigation.navigate(routes.NEW_INFO)}/>
             </View>

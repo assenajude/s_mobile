@@ -2,10 +2,10 @@ import React from 'react';
 import AppButton from "../AppButton";
 import {useFormikContext} from "formik";
 
-function FormSubmitButton({title}) {
+function FormSubmitButton({title, otherProps}) {
     const {handleSubmit} = useFormikContext()
     return (
-        <AppButton title={title} onPress={handleSubmit}/>
+        <AppButton otherButtonStyle={{width: '80%', alignSelf: 'center'}} title={title} onPress={handleSubmit} {...otherProps}/>
     );
 }
 

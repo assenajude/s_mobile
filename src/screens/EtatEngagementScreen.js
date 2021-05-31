@@ -1,7 +1,8 @@
-import React, {useState, useEffect} from 'react';
-import  {View, FlatList, TouchableWithoutFeedback,TouchableOpacity, Modal, StyleSheet} from "react-native";
+import React, {useState, useEffect, useRef} from 'react';
+import  {View, FlatList, StyleSheet} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import {useDispatch, useSelector, useStore} from "react-redux";
+
 import MemberListItem from "../components/member/MemberListItem";
 import AppText from "../components/AppText";
 import useManageAssociation from "../hooks/useManageAssociation";
@@ -11,73 +12,73 @@ import defaultStyles from '../utilities/styles'
 import AppAddNewButton from "../components/AppAddNewButton";
 import EngagementItem from "../components/engagement/EngagementItem";
 import useEngagement from "../hooks/useEngagement";
-import {getEngagementDetail} from "../store/slices/engagementSlice";
+import {
+    getEngagementDetail,
+    getPayingTranche,
+    getTranchePayed,
+    showEngagementTranches
+} from "../store/slices/engagementSlice";
 import useAuth from "../hooks/useAuth";
+import AppHeaderGradient from "../components/AppHeaderGradient";
+import {Picker} from "@react-native-picker/picker";
+import TrancheRightActions from "../components/tranche/TrancheRightActions";
 
 function EtatEngagementScreen({navigation}) {
     const dispatch = useDispatch()
     const store = useStore()
     const {getMemberUserCompte} = useAuth()
     const {formatFonds, associationValidMembers} = useManageAssociation()
-    const {getMemberEngagementInfos} = useEngagement()
+    const {getMemberEngagementInfos, handlePayTranche} = useEngagement()
 
-    const engagements = useSelector(state => state.entities.engagement.list)
-    const [showDropdown, setShowDropdown] = useState(false)
-    const [isByMember, setIsByMember] = useState(false)
+    const currentUser = useSelector(state => state.auth.user)
+    const connectedMember = useSelector(state => {
+        const listMember = state.entities.association.selectedAssociationMembers
+        const currentMember = listMember.find(item => item.id === currentUser.id)
+        return currentMember
+    })
+    const engagements = useSelector(state => {
+        const list = state.entities.engagement.list
+        const validList = list.filter(item => item.accord === true)
+        return validList
+    })
+    const allTranches = useSelector(state => state.entities.engagement.tranches)
     const [mainData, setMainData] = useState(engagements)
-
-    const dropdownData = [
-        {
-        id: 1,
-        label: 'Tous les engagements'
-    },
-    {
-        id: 2,
-        label: 'Par membre'
-    }
-    ]
-
-    const [data, setData] = useState(dropdownData[0])
-
-    const handleChangeContent = (item) => {
-        setData(item)
-        if(item.id === 2) {
-            setIsByMember(true)
-            setMainData(associationValidMembers())
-        }
-        else {
-            setIsByMember(false)
-            setMainData(engagements)
-        }
-        setShowDropdown(false)
-    }
+    const [pickerValue, setPickerValue] = useState('all')
+    const [editTrancheMontant, setEditTrancheMontant] = useState('')
 
     const handleEngagementDetails = async (item) => {
         await dispatch(getEngagementDetail(item))
-        const newEngagements = store.getState().entities.engagement.list
-        setMainData(newEngagements)
-
-
     }
 
+    const handleChangeContent = (value) => {
+        if(value.toLowerCase() === 'member') setMainData(associationValidMembers())
+        else setMainData(engagements)
+    }
+/*
+    const handlePayTranche = (tranche, item) => {
+        const data = {
+            id: tranche.id,
+            montant: editTrancheMontant,
+            engagementId: item.id,
+            userId: currentUser.id
+        }
+        dispatch(getTranchePayed(data))
+    }*/
 
     useEffect(() => {
     }, [])
 
     return (
         <>
+            <AppHeaderGradient/>
             <View>
-                <TouchableWithoutFeedback onPress={() => setShowDropdown(!showDropdown)}>
-                    <View style={styles.dropdown}>
-                        <AppText>{data.label}</AppText>
-                        {!showDropdown && <MaterialCommunityIcons name="chevron-down" size={24} color="black" />}
-                        {showDropdown && <MaterialCommunityIcons name="chevron-up" size={24} color="black" />}
-                    </View>
-                </TouchableWithoutFeedback>
-                {showDropdown && <View style={styles.dropdownContent}>
-                    {dropdownData.map(item =>
-                        <AppText onPress={()=>handleChangeContent(item)} key={item.label} style={styles.dropdownText}>{item.label}</AppText>)}
-                </View>}
+                <Picker itemStyle={{fontWeight: 'bold'}} style={styles.picker} mode='dropdown' selectedValue={pickerValue} onValueChange={val => {
+                    setPickerValue(val)
+                    handleChangeContent(val)
+                }}>
+                    <Picker.Item label='Tous les engagements' value='all'/>
+                    <Picker.Item label='Par membre' value='member'/>
+                </Picker>
             </View>
             <View style={{
                 marginVertical: 10
@@ -91,39 +92,47 @@ function EtatEngagementScreen({navigation}) {
             }}>
                 <AppText>Aucun engagements trouvé</AppText>
             </View>}
-           {mainData.length>0 && <FlatList data={mainData}
+           {mainData.length>0 && <FlatList data={pickerValue.toLowerCase() === 'member'?associationValidMembers():engagements}
                      keyExtractor={item => item.id.toString()}
                      ItemSeparatorComponent={ListItemSeparator}
                      renderItem={({item}) => {
-                         if(isByMember) {
-                           return  <MemberListItem
+                         if(pickerValue.toLowerCase() === 'member') {
+                           return  <MemberListItem selectedMember={item}
                                childrenStyle={{
                                    top: 25
                                }}
-                               username={item.username}
-                               memberAddress={item.email?item.email:item.phone}
                                getMemberDetails={() => navigation.navigate(routes.LIST_ENGAGEMENT, item)}>
                                <AppText style={{marginHorizontal: 20}}>({getMemberEngagementInfos(item).engagementLength})</AppText>
                                <AppText>{formatFonds(getMemberEngagementInfos(item).engagementAmount)}</AppText>
                              </MemberListItem>
                          }
 
-                         return <EngagementItem label={item.libelle}
-                                                montant={item.montant}
-                                                memberUsername={getMemberUserCompte(item.member).username}
-                                                memberAvatar={require('../../assets/user_avatar.jpg')}
-                                                memberAddress={getMemberUserCompte(item.member).email?getMemberUserCompte(item.member).email:getMemberUserCompte(item.member).phone}
-                                                engagementDetails={item.showDetail}
-                                                getEngagementDetails={() => handleEngagementDetails(item)}
-                                                statutEngagement={item.statut}
-                                                demandDate={item.createdAt}
-                                                validationDate={item.updatedAt}
-                                                echeanceDate={item.echeance}/>
+                         return <EngagementItem
+                             renderRightActions={(tranche) =>
+                                 connectedMember.id === item.creatorId?<TrancheRightActions
+                                 ended={tranche.montant===tranche.solde}
+                                 isPaying={tranche.paying}
+                                 payingTranche={() => {dispatch(getPayingTranche(tranche))}}
+                             />:null
+                             }
+                             editTrancheMontant={editTrancheMontant}
+                             onChangeTrancheMontant={val => setEditTrancheMontant(val)}
+                             handlePayTranche={(tranche) =>handlePayTranche(tranche.id, item.id, editTrancheMontant)}
+                             tranches={allTranches.filter(tranche => tranche.engagementId === item.id)}
+                             showTranches={item.showTranches}
+                             getTranchesShown={() => {
+                                 dispatch(showEngagementTranches(item))
+                             }}
+                             engagement={item}
+                             selectedMember={getMemberUserCompte(item.Creator)}
+                             engagementDetails={item.showDetail}
+                             getEngagementDetails={() => handleEngagementDetails(item)}
+                         />
 
                      }}
            />}
            <View style={styles.addNew}>
-               <AppAddNewButton onPress={() => navigation.navigate(routes.NEW_ENGAGEMENT)}/>
+               <AppAddNewButton name='vote' onPress={() => navigation.navigate('Engagements', {screen: routes.NEW_ENGAGEMENT_LIST})}/>
            </View>
         </>
     );
@@ -153,6 +162,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         paddingBottom: 20,
         paddingLeft: 30
+    },
+    picker: {
+      width: 250,
+        alignSelf: 'center'
     },
     dropdownText: {
         color: defaultStyles.colors.bleuFbi,

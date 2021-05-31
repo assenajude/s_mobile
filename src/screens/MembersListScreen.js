@@ -7,6 +7,7 @@ import AppAddNewButton from "../components/AppAddNewButton";
 import routes from "../navigation/routes";
 import ListItemSeparator from "../components/ListItemSeparator";
 import useManageAssociation from "../hooks/useManageAssociation";
+import AppHeaderGradient from "../components/AppHeaderGradient";
 
 function MembersListScreen({navigation}) {
     const {associationValidMembers} = useManageAssociation()
@@ -16,6 +17,7 @@ function MembersListScreen({navigation}) {
 
     return (
         <>
+            <AppHeaderGradient/>
             {associationValidMembers().length===0 && <View style={styles.emptyStyle}>
                 <AppText>Aucun membre trouvé</AppText>
             </View>}
@@ -25,17 +27,13 @@ function MembersListScreen({navigation}) {
                       keyExtractor={item => item.id.toString()}
                      ItemSeparatorComponent={ListItemSeparator}
                       renderItem={({item}) =>
-                          <MemberListItem memberAddress={item.email?item.email : item.phone}
-                              username={item.username?item.username:item.nom}
+                          <MemberListItem selectedMember={item}
                               childrenStyle={{top: 30}}
                               getMemberDetails={() => navigation.navigate('MemberDetails', item)}>
                               <AppText>{item.member.statut}</AppText>
                           </MemberListItem>
                       }
             />}
-            <View style={styles.addNew}>
-                <AppAddNewButton onPress={() => navigation.navigate(routes.NEW_MEMBER)}/>
-            </View>
         </>
     );
 }
