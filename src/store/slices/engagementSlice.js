@@ -36,8 +36,19 @@ const engagementSlice = createSlice({
             })
         },
         engagementVoted: (state, action) => {
-          // const updateIndex = state.votesList[action.payload.id]
-          state.votesList[action.payload.id] = action.payload.engagements
+          state.votesList[action.payload.engagement.id] = action.payload.engagements
+            const updatedIndex = state.list.findIndex(engage => engage.id === action.payload.engagement.id)
+            const newEngagements = state.list
+            newEngagements[updatedIndex] = action.payload.engagement
+            state.list = newEngagements
+        },
+        engagementUpdated: (state, action) => {
+          state.loading = false
+          state.error = null
+            const updatedIndex = state.list.findIndex(engage => engage.id === action.payload.id)
+            const newEngagements = state.list
+            newEngagements[updatedIndex] = action.payload
+            state.list = newEngagements
         },
         votesReceived: (state, action) => {
           state.error = null
@@ -68,7 +79,7 @@ const engagementSlice = createSlice({
 })
 
 export default engagementSlice.reducer
-const {engagementAdded, engagementRequested, engagementRequestFailed,payingTranche,
+const {engagementAdded, engagementRequested, engagementRequestFailed,payingTranche, engagementUpdated,
     engagementsReceived, showDetails, engagementVoted, votesReceived, showTranches, tranchePayed} = engagementSlice.actions
 
 const url = '/engagements'
@@ -115,6 +126,15 @@ export const getTranchePayed = (data) => apiRequested({
     method: 'patch',
     onStart: engagementRequested.type,
     onSuccess: tranchePayed.type,
+    onError: engagementRequestFailed.type
+})
+
+export const getEngagementById = (data) => apiRequested({
+    url: url+'/getById',
+    data,
+    method: 'post',
+    onStart: engagementRequested.type,
+    onSuccess: engagementUpdated.type,
     onError: engagementRequestFailed.type
 })
 

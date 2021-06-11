@@ -5,7 +5,6 @@ import routes from "../navigation/routes";
 import {useDispatch, useSelector} from "react-redux";
 import InformationItem from "../components/information/InformationItem";
 import ListItemSeparator from "../components/ListItemSeparator";
-import useManageAssociation from "../hooks/useManageAssociation";
 import {readMemberInfos} from "../store/slices/memberSlice";
 import useInfo from "../hooks/useInfo";
 import {showInfoDetails} from "../store/slices/informationSlice";

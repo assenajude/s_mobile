@@ -1,56 +1,38 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import {View,TouchableOpacity,TouchableWithoutFeedback, StyleSheet, ScrollView, Image} from "react-native";
+import {View,TouchableOpacity,StyleSheet, ScrollView} from "react-native";
 import {useDispatch, useSelector, useStore} from "react-redux";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import AppText from "../components/AppText";
 import defaultStyles from '../utilities/styles'
 import LottieView from "lottie-react-native";
 import useManageAssociation from "../hooks/useManageAssociation";
-import {getAllMembers, getMemberInfos} from "../store/slices/memberSlice";
-import {getAllCotisations} from "../store/slices/cotisationSlice";
 import ListItemSeparator from "../components/ListItemSeparator";
 import FondsLabel from "../components/association/FondsLabel";
 import AppLinkButton from "../components/AppLinkButton";
-import {getAllVotes, getEngagementsByAssociation} from "../store/slices/engagementSlice";
 import useCotisation from "../hooks/useCotisation";
 import useEngagement from "../hooks/useEngagement";
-import {getAssociationInfos} from "../store/slices/informationSlice";
-import {getSelectedAssociationMembers, getMemberRoles} from "../store/slices/associationSlice";
 import routes from "../navigation/routes";
 import AppHeaderGradient from "../components/AppHeaderGradient";
-import useAuth from "../hooks/useAuth";
-import AppAddNewButton from "../components/AppAddNewButton";
 import AssociationBackImage from "../components/association/AssociationBackImage";
+import AppActivityIndicator from "../components/AppActivityIndicator";
+import useAuth from "../hooks/useAuth";
+import {getAvatarUpdate} from "../store/slices/associationSlice";
 
 function DashboardScreen({navigation}) {
     const dispatch = useDispatch()
     const store = useStore()
-    const {isModerator, isAdmin} = useAuth()
-    const {formatFonds,getNewAdhesion,getManagedAssociationFund} = useManageAssociation()
-    const {getAssociationCotisation} = useCotisation()
+    const {getInitAssociation} = useAuth()
+    const {formatFonds,getNewAdhesion,getManagedAssociationFund, associationValidMembers} = useManageAssociation()
+    const {getCurrentAssoCotisations} = useCotisation()
     const {getAssociationEngagementTotal} = useEngagement()
 
-    const currentUser = useSelector(state => state.auth.user)
     const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
-    const benefice = useSelector(state => {
-        let totalBenefice = 0
-        const listEngagement = state.entities.engagement.list
-        const endedList = listEngagement.filter(engage => engage.statut.toLowerCase() === 'ended')
-        endedList.forEach(item => {
-            totalBenefice += item.interetMontant
-        })
-        return totalBenefice
-    })
-    const members = useSelector(state => {
-        const list = state.entities.member.list
-        const selectedList = list.filter(item => item.associationId === currentAssociation.id)
-        const validList = selectedList.filter(member => {
-            const isMember = member.relation.toLowerCase() === 'member'
-            const isOnLeave = member.relation.toLowerCase() === 'onleave'
-            if (isMember || isOnLeave) return true
-        })
-        return validList
-    })
+    const isLoading = useSelector(state => state.entities.association.loading)
+    const infoLoading = useSelector(state => state.entities.information.loading)
+    const engagementLoading = useSelector(state => state.entities.engagement.loading)
+    const memberLoading = useSelector(state => state.entities.member.loading)
+    const cotisationLoading = useSelector(state => state.entities.cotisation.loading)
+
     const notReadInfo = useSelector(state => {
         const list = state.entities.member.memberInfos
         const notRead = list.filter(info => info.member_info.isRead === false)
@@ -58,25 +40,24 @@ function DashboardScreen({navigation}) {
     })
 
     const [showDescrip, setShowDescrip] = useState(false)
-    const isAuthorized = isAdmin() || isModerator()
+
+    const handleChangeImage = async (result) => {
+        if(!result) {
+            return alert("Impossible d'enregistrer l'image, veuillez reessayer plutard.")
+        }
+        const avatarSignedUrl = store.getState().uploadImage.signedRequestArray
+        const avatarUrl = avatarSignedUrl[0].url
+        await dispatch(getAvatarUpdate({associationId: currentAssociation.id, avatarUrl: avatarUrl}))
+        const error = store.getState().entities.association.error
+        if(error !== null) {
+            return alert("Nous avons rencontré une erreur. Veuillez reessayer plutard.")
+        }
+        alert("Votre association a été mise à jour avec succsès.")
+    }
 
     const getStarted = useCallback(async () => {
-        dispatch(getAllCotisations({associationId: currentAssociation.id}))
-        dispatch(getAllMembers())
-        dispatch(getEngagementsByAssociation({associationId:currentAssociation.id}))
-        dispatch(getAssociationInfos({associationId: currentAssociation.id}))
-        dispatch(getSelectedAssociationMembers({associationId: currentAssociation.id}))
-        dispatch(getAllVotes({associationId: currentAssociation.id}))
-        if(members.length>0) {
-            const currentMember = members.find(item => item.userId === currentUser.id)
-            dispatch(getMemberInfos({memberId: currentMember.id}))
-            dispatch(getMemberRoles({memberId: currentMember.id}))
-        }
+        await getInitAssociation(currentAssociation)
     }, [])
-
-    const handleChangeImage = (result) => {
-        console.log(result)
-    }
 
     useEffect(() => {
         getStarted()
@@ -85,11 +66,35 @@ function DashboardScreen({navigation}) {
 
     return (
         <>
+            <AppActivityIndicator visible={isLoading || infoLoading || cotisationLoading || memberLoading || engagementLoading}/>
             <ScrollView>
             <AppHeaderGradient/>
-            <AssociationBackImage association={currentAssociation} uploadResult={handleChangeImage}/>
-         {/*       <Image style={styles.image} source={currentAssociation.avatar?{uri: currentAssociation.avatar}:require('../../assets/peuple_solidaire.png')}/>
-                <AppText style={{alignSelf: 'center', marginVertical: 10, fontWeight: 'bold'}}>{currentAssociation.nom}</AppText>*/}
+            <AssociationBackImage  association={currentAssociation} uploadResult={handleChangeImage}/>
+                <View style={styles.descriptionContainer}>
+                    <View>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                margin: 20
+                            }}>
+                            <TouchableOpacity onPress={() => setShowDescrip(!showDescrip)}>
+                                {!showDescrip && <MaterialCommunityIcons name="plus" size={24} color="black" />}
+                                {showDescrip && <MaterialCommunityIcons name="minus" size={24} color="black" />}
+                            </TouchableOpacity>
+                            <AppText
+                                style={{
+                                    fontWeight: 'bold',
+                                    marginLeft: 5,
+                                }}>Description</AppText>
+                        </View>
+                        {showDescrip && <View style={{
+                            paddingHorizontal: 20
+                        }}>
+                            <AppText>{currentAssociation.description}</AppText>
+                        </View>}
+                    </View>
+
+                </View>
                 <View style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
@@ -131,7 +136,7 @@ function DashboardScreen({navigation}) {
                     </View>
                     <View style={{justifyContent: 'flex-start', paddingVertical: 20, paddingHorizontal: 10}}>
 
-                            <FondsLabel label='Cotisations' value={getAssociationCotisation().total}/>
+                            <FondsLabel label='Cotisations' value={getCurrentAssoCotisations()?.total}/>
                             <FondsLabel label='Invests'
                                         value={getManagedAssociationFund().investAmount} labelStyle={{color: defaultStyles.colors.orange}}
                                         valueStyle={{color: defaultStyles.colors.orange}}
@@ -147,38 +152,14 @@ function DashboardScreen({navigation}) {
                     </View>
 
                 </View>
-                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <View>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            margin: 20
-                        }}>
-                        <TouchableOpacity onPress={() => setShowDescrip(!showDescrip)}>
-                            {!showDescrip && <MaterialCommunityIcons name="plus" size={24} color="black" />}
-                            {showDescrip && <MaterialCommunityIcons name="minus" size={24} color="black" />}
-                        </TouchableOpacity>
-                        <AppText
-                            style={{
-                                fontWeight: 'bold',
-                                marginLeft: 5,
-                            }}>Description</AppText>
-                    </View>
-                    {showDescrip && <View style={{
-                        paddingHorizontal: 20
-                    }}>
-                        <AppText>{currentAssociation.description}</AppText>
-                    </View>}
-                    </View>
 
-                </View>
                 <View style={styles.linkContainer}>
                     <AppLinkButton label='Members'
-                                   labelLength={members?.length}
+                                   labelLength={associationValidMembers()?.length}
                                    onPress={() => navigation.navigate('Members')}/>
                     <AppLinkButton label='Cotisations'
-                                   labelLength={getAssociationCotisation().cotisLenght}
-                                   totalAmount={getAssociationCotisation().total}
+                                   labelLength={getCurrentAssoCotisations()?.cotisLenght}
+                                   totalAmount={getCurrentAssoCotisations()?.total}
                                    onPress={() => navigation.navigate('Cotisations')}/>
 
                     <AppLinkButton label='Engagements'
@@ -245,6 +226,12 @@ const styles = StyleSheet.create({
        borderRadius: 30,
       borderWidth: 1,
       borderColor: defaultStyles.colors.or
+    },
+    descriptionContainer:{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginVertical: 20
     },
     fondsContainer: {
         borderWidth: 4,

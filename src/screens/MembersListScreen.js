@@ -1,20 +1,13 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {View, FlatList, StyleSheet} from "react-native";
-import {useSelector} from "react-redux";
 import MemberListItem from "../components/member/MemberListItem";
 import AppText from "../components/AppText";
-import AppAddNewButton from "../components/AppAddNewButton";
-import routes from "../navigation/routes";
 import ListItemSeparator from "../components/ListItemSeparator";
 import useManageAssociation from "../hooks/useManageAssociation";
 import AppHeaderGradient from "../components/AppHeaderGradient";
 
 function MembersListScreen({navigation}) {
     const {associationValidMembers} = useManageAssociation()
-
-    useEffect(() => {
-    }, [])
-
     return (
         <>
             <AppHeaderGradient/>

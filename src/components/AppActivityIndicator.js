@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet, ActivityIndicator} from "react-native";
-import colors from "../utilities/colors";
+import defaultStyles from "../utilities/styles";
 import LottieView from "lottie-react-native";
 
 
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         zIndex: 1,
-        backgroundColor: colors.blanc,
+        backgroundColor: defaultStyles.colors.white,
         opacity: 0.8
     }
 })

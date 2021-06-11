@@ -1,19 +1,18 @@
 import React from 'react';
 import { StyleSheet, ScrollView, View} from "react-native";
-import {LinearGradient} from "expo-linear-gradient";
 
 import AppForm from "../components/form/AppForm";
 import AppFormField from "../components/form/AppFormField";
 import * as Yup from 'yup'
 import FormSubmitButton from "../components/form/FormSubmitButton";
-import {useDispatch, useStore} from "react-redux";
+import {useDispatch, useSelector, useStore} from "react-redux";
 import {signin} from "../store/slices/authSlice";
 
 import defaultStyles from '../utilities/styles'
 import AppText from "../components/AppText";
 import routes from "../navigation/routes";
 import AppLogoInfo from "../components/AppLogoInfo";
-import GradientButton from "../components/GradientButton";
+import AppActivityIndicator from "../components/AppActivityIndicator";
 
 const loginValidSchema = Yup.object().shape({
     info: Yup.string().required('Entrez votre adresse mail ou votre nom utilisateur'),
@@ -23,6 +22,7 @@ const loginValidSchema = Yup.object().shape({
 function LoginScreen({navigation}) {
     const store = useStore()
     const dispatch = useDispatch()
+    const isLoading = useSelector(state => state.auth.loading)
 
     const  validateEmail = (email) => {
         const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/
@@ -45,18 +45,22 @@ function LoginScreen({navigation}) {
             }
         await dispatch(signin(data))
               const error = store.getState().auth.error
-              if(error !== null) return alert('error')
+              if(error !== null) return alert("Le mot de passe et/ou le pseudo n'est pas correct. Veuillez reessayer.")
               resetForm()
-              // dispatch(getLoggedIn())
               navigation.navigate(routes.STARTER)
     }
 
     return (
         <>
+            <AppActivityIndicator visible={isLoading}/>
             <View style={styles.logoInfoContainer}>
                 <AppLogoInfo/>
             </View>
-        <ScrollView>
+        <ScrollView
+            contentContainerStyle={{
+                marginVertical: 20,
+                marginHorizontal: 20
+            }}>
             <AppForm
                 initialValues={{
                     info: '',

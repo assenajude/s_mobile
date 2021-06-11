@@ -1,7 +1,7 @@
 export default Object.freeze({
     LOGIN: 'LoginScreen',
     REGISTER: 'RegisterScreen',
-    STARTER: 'StarterScreen',
+    STARTER: 'Starter',
     ASSOCIATION_LIST: 'ListAssociationScreen',
     NEW_ASSOCIATION: 'NewAssociationScreen',
     EDIT_MEMBER: 'EditMemberScreen',
@@ -13,5 +13,14 @@ export default Object.freeze({
     USER_COMPTE: 'UserCompte',
     EDIT_USER_COMPTE: 'EditUserCompte',
     NEW_ENGAGEMENT_LIST: 'NewEngagementList',
-    ASSOCIATION_DETAILS: 'AssociationDetailScreen'
+    ASSOCIATION_DETAILS: 'AssociationDetailScreen',
+    TRANSACTION: 'Transaction',
+    NEW_TRANSACTION: 'NewTransaction',
+    TRANSACTION_: 'TransactionDetail',
+    TRANSACTION_DETAIL: 'TransactionDetail',
+    VALIDATION_TRANSAC_DETAIL: 'ValidationTransacDetail',
+    EDITI_TRANSACTION: 'EditTransaction',
+    HELP: 'HelpScreen',
+    LIST_COTISATION: 'ListCotisation',
+    PAYEMENT_COTISATION: 'PayementCotisation'
 })

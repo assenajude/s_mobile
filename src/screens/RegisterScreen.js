@@ -9,8 +9,9 @@ import FormSubmitButton from "../components/form/FormSubmitButton";
 import AppText from "../components/AppText";
 import defaultStyles from '../utilities/styles'
 import routes from "../navigation/routes";
-import {useDispatch, useStore} from "react-redux";
+import {useDispatch, useSelector, useStore} from "react-redux";
 import {register} from "../store/slices/authSlice";
+import AppActivityIndicator from "../components/AppActivityIndicator";
 
 
 const registerValidSchema = Yup.object().shape({
@@ -29,16 +30,19 @@ const registerValidSchema = Yup.object().shape({
 function RegisterScreen({navigation}) {
     const store = useStore()
     const dispatch = useDispatch()
+    const isLoading = useSelector(state => state.auth.loading)
 
-    const handleRegister = async (data) => {
+    const handleRegister = async (data, {resetForm}) => {
         await dispatch(register(data))
         const error = store.getState().auth.error
-        if(error !== null)return alert("Error")
+        if(error !== null)return alert("Une erreur est survenue. Veuillez reessayer plutard.")
+        resetForm()
         navigation.navigate(routes.LOGIN)
     }
 
     return (
         <>
+            <AppActivityIndicator visible={isLoading}/>
             <View style={styles.logoInfoContainer}>
                <AppLogoInfo/>
             </View>
@@ -54,23 +58,30 @@ function RegisterScreen({navigation}) {
                 onSubmit={handleRegister}
             >
                 <AppFormField
+                    autoCapitalize='none'
                     name='username'
                     placeholder='pseudo'
                     icon='account'
+                    returnKeyType='next'
                 />
                 <AppFormField
+                    autoCapitalize='none'
                     name='email'
                     placeholder='email'
                     icon='email'
                     keyboardType='email-address'
+                    returnKeyType='next'
                 />
                 <AppFormField
+                    autoCapitalize='none'
                     name='password'
                     placeholder='password'
                     icon='lock'
                     secureTextEntry
+                    returnKeyType='next'
                 />
                 <AppFormField
+                    autoCapitalize='none'
                     name='confirm'
                     placeholder='confirm password'
                     icon='lock'
@@ -79,7 +90,9 @@ function RegisterScreen({navigation}) {
                 <FormSubmitButton title='Valider'/>
             </AppForm>
 
-            <View>
+            <View style={{
+                marginVertical: 20
+            }}>
                 <AppText>Vous avez deja un compte? </AppText>
                 <AppText
                     style={{color: defaultStyles.colors.bleuFbi}}
@@ -94,7 +107,9 @@ function RegisterScreen({navigation}) {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10
+        marginVertical: 20,
+        marginHorizontal: 20,
+        paddingBottom: 40,
     },
     logoInfoContainer: {
         alignItems: 'center',

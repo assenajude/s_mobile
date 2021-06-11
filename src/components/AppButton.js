@@ -4,10 +4,11 @@ import {MaterialCommunityIcons} from "@expo/vector-icons"
 import colors from "../utilities/colors";
 import {LinearGradient} from "expo-linear-gradient";
 
-function AppButton({title, otherButtonStyle, textStyle,iconName,iconSize=30,iconColor='white', onPress}) {
+function AppButton({title,color1='#4c669f',color2='#3b5998',color3='#192f6a', otherButtonStyle, textStyle,iconName,iconSize=30,iconColor='white', onPress}) {
     return (
+
         <LinearGradient
-            colors={['#4c669f', '#3b5998', '#192f6a']}
+            colors={[`${color1}`,`${color2}`,`${color3}`]}
             style={[styles.buttonStyle, otherButtonStyle]}>
         <TouchableOpacity style={[styles.buttonStyle, otherButtonStyle]} onPress={onPress}>
             <View style={{
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
     buttonStyle: {
         alignItems: 'center',
         justifyContent: 'center',
-        height: 50,
+        height: 40,
         marginVertical: 10,
         width: '100%',
         borderRadius: 40

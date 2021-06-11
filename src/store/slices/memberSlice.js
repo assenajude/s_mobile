@@ -1,5 +1,6 @@
 import {createSlice} from "@reduxjs/toolkit";
 import {apiRequested} from "../actionsCreators/apiActionCreator";
+import dayjs from "dayjs";
 
 const memberSlice = createSlice({
     name: 'member',
@@ -9,7 +10,12 @@ const memberSlice = createSlice({
         list: [],
         memberAssociations: [],
         memberInfos: [],
-        randomIdentity: {}
+        membersCotisations: {},
+        randomIdentity: {},
+        memberYearCotisations: [],
+        selectedMonthCotisations: [],
+        years: [],
+        months: []
     },
     reducers: {
         memberRequested: (state,action) => {
@@ -54,16 +60,69 @@ const memberSlice = createSlice({
             const infos = action.payload
             state.memberInfos = infos
         },
-        imagesEdited: (state, action) => {
+        membersCotisationReceived: (state, action) => {
             state.loading = false
             state.error = null
-        }
+            state.membersCotisations = action.payload
+        },
+        memberCotisationPayed: (state, action) => {
+            state.loading = false
+            state.error = null
+            const selected = state.membersCotisations[action.payload.memberId]
+            if(selected) state.membersCotisations[action.payload.memberId] = action.payload.cotisations
+        },
+        initTimeData: (state, action) => {
+            state.years = action.payload.years
+            state.months = action.payload.months
+        },
+        selectYear: (state, action) => {
+            let selectedYear = state.years.find(item => item.year === action.payload.year)
+            selectedYear.selected = true
+            const otherItems = state.years.filter(item => item.year !== selectedYear.year)
+            otherItems.forEach(item => item.selected = false)
+            const newCotisationTab = []
+            const memberCotisations = state.membersCotisations[action.payload.memberId]
+            memberCotisations.forEach(cotisation => {
+                const creationDate = cotisation.member_cotisation.paymentDate
+                const creationYear = dayjs(creationDate).year()
+                if(creationYear === selectedYear.year) {
+                    newCotisationTab.push(cotisation)
+                }
+            })
+            state.months.forEach(month => month.showDetail = false)
+            state.memberYearCotisations = newCotisationTab
+        },
+        showMonthDetail: (state, action) => {
+            const selectedCotisation = state.memberYearCotisations.filter(cotisation => {
+                const cotisationdate = cotisation.member_cotisation.paymentDate
+                const cotisationMonth = dayjs(cotisationdate).month()
+                if(cotisationMonth === action.payload.number) return true
+                return false
+            })
+            state.selectedMonthCotisations = selectedCotisation
+            let selectedMonth = state.months.find(item => item.label === action.payload.label)
+            selectedMonth.showDetail = !selectedMonth.showDetail
+            const otherMonths = state.months.filter(item => item.label !== selectedMonth.label)
+            otherMonths.forEach(item => item.showDetail = false)
+        },
+        showCotisationDetails: (state, action) => {
+            let selectedCotisation = state.selectedMonthCotisations.find(cotisation => cotisation.id === action.payload.id)
+            if(selectedCotisation) {
+                selectedCotisation.showDetail = !selectedCotisation.showDetail
+            }
+            const others = state.selectedMonthCotisations.filter(cotisation => cotisation.id !== selectedCotisation.id)
+            others.forEach(cotisation => cotisation.showDetail = false)
+        },
+
 
     }
 })
 
 const {memberRequested, memberRequestFailed, memberAssociationReceived,
-    memberAdded,updateOne, memberInfosReceived, allMembersReceived} = memberSlice.actions
+    memberAdded,updateOne, memberInfosReceived,
+    allMembersReceived, memberCotisationPayed,
+    membersCotisationReceived, showCotisationDetails,
+    showMonthDetail, selectYear, initTimeData} = memberSlice.actions
 export default memberSlice.reducer
 
 const url = '/members'
@@ -147,3 +206,38 @@ export const getImagesEdit = (data) => apiRequested({
     onSuccess: updateOne.type,
     onError: memberRequestFailed.type
 })
+
+export const payMemberCotisation = (data) => apiRequested({
+    url: url+'/payCotisations',
+    data,
+    method: 'patch',
+    onStart: memberRequested.type,
+    onSuccess: memberCotisationPayed.type,
+    onError: memberRequestFailed.type
+})
+
+export const getMembersCotisations = (data) => apiRequested({
+    url: url+'/membersCotisations',
+    data,
+    method: 'post',
+    onStart: memberRequested.type,
+    onSuccess: membersCotisationReceived.type,
+    onError: memberRequestFailed.type
+})
+
+export const populateTimeData = (data) => dispatch => {
+    dispatch(initTimeData(data))
+}
+
+export const getYearSelected = (year) => dispatch => {
+    dispatch(selectYear(year))
+}
+
+export const getMonthDetails = (month) => dispatch => {
+    dispatch(showMonthDetail(month))
+}
+
+export const getCotisationDetails = (cotisation) => dispatch => {
+    dispatch(showCotisationDetails(cotisation))
+}
+

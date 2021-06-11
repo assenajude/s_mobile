@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {ScrollView, View, StyleSheet} from "react-native";
 import AssociationBackImage from "../components/association/AssociationBackImage";
 import {useDispatch, useStore} from "react-redux";
@@ -6,8 +6,6 @@ import {getAvatarUpdate} from "../store/slices/associationSlice";
 import AppLabelWithValue from "../components/AppLabelWithValue";
 import AppSimpleLabelWithValue from "../components/AppSimpleLabelWithValue";
 import useManageAssociation from "../hooks/useManageAssociation";
-import AppLabelWithIcon from "../components/AppLabelWithIcon";
-import AppLinkButton from "../components/AppLinkButton";
 import AppText from "../components/AppText";
 import defaultStyles from "../utilities/styles";
 import AppAddNewButton from "../components/AppAddNewButton";

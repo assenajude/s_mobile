@@ -1,12 +1,13 @@
 import React from 'react';
-import {View, ScrollView, ToastAndroid} from "react-native";
+import {ScrollView, ToastAndroid} from "react-native";
 import {useDispatch, useSelector, useStore} from "react-redux";
 import * as Yup from 'yup'
 
 import {AppForm, AppFormField, FormSubmitButton} from "../components/form";
-import {addNewEngagement} from "../store/slices/engagementSlice";
+import {addNewEngagement, getEngagementsByAssociation} from "../store/slices/engagementSlice";
 import AppTimePicker from "../components/AppTimePicker";
 import FormItemPicker from "../components/form/FormItemPicker";
+import AppActivityIndicator from "../components/AppActivityIndicator";
 
 const validEngagement = Yup.object().shape({
     libelle: Yup.string(),
@@ -24,6 +25,7 @@ function NewEngagementScreen({navigation}) {
         return selected
     })
     const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
+    const isLoading = useSelector(state => state.entities.engagement.loading)
 
     const handleAddEngagement = async (engagement, {resetForm}) => {
                const dateEcheance = engagement.echeance.getTime()
@@ -41,14 +43,17 @@ function NewEngagementScreen({navigation}) {
         }
         ToastAndroid.showWithGravityAndOffset('Engagement ajouté avec succès',
             ToastAndroid.LONG,
-            ToastAndroid.CENTER,
-            50,
+            ToastAndroid.BOTTOM,
+            40,
             250
         )
+        dispatch(getEngagementsByAssociation({associationId: currentAssociation.id}))
         resetForm()
     }
 
     return (
+        <>
+            <AppActivityIndicator visible={isLoading}/>
         <ScrollView contentContainerStyle={{
             marginHorizontal: 20,
             marginVertical: 20
@@ -66,6 +71,7 @@ function NewEngagementScreen({navigation}) {
                 <FormSubmitButton title='Ajouter'/>
             </AppForm>
         </ScrollView>
+        </>
     );
 }
 

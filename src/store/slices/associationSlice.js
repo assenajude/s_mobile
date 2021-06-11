@@ -46,6 +46,14 @@ const associationSlice = createSlice({
             state.list[updateIndex] = action.payload
             if(state.selectedAssociation.id === action.payload.id) state.selectedAssociation = action.payload
         },
+        connectedMemberUpdated:(state, action) => {
+            state.loading = false
+            state.error = null
+            const memberIndex = state.selectedAssociationMembers.findIndex(member => member.id === action.payload.id)
+            const newMembers = state.selectedAssociationMembers
+            newMembers[memberIndex] = action.payload
+            state.selectedAssociationMembers = newMembers
+        },
         memberRolesReceived: (state, action) => {
             state.loading = false
             state.error = null
@@ -64,7 +72,7 @@ const associationSlice = createSlice({
 const {associationAdded, associationReceived,
     associationRequested, associationRequestFailed,
     selectedAssociationSet, associationMembersReceived, memberRolesReceived,
-    rolesEdited, associationUpdated} = associationSlice.actions
+    rolesEdited, associationUpdated, connectedMemberUpdated} = associationSlice.actions
 
 export default associationSlice.reducer
 
@@ -119,6 +127,24 @@ export const getAvatarUpdate = (data) => apiRequested({
     method: 'patch',
     onStart: associationRequested.type,
     onSuccess: associationUpdated.type,
+    onError: associationRequestFailed.type
+})
+
+export const getSelectedAssociation = (data) => apiRequested({
+    url:url+'/selectedAssociation',
+    data,
+    method: 'post',
+    onStart: associationRequested.type,
+    onSuccess: associationUpdated.type,
+    onError: associationRequestFailed.type
+})
+
+export const getConnectedMember = (data) => apiRequested({
+    url:url+'/connectedMember',
+    data,
+    method: 'post',
+    onStart: associationRequested.type,
+    onSuccess: connectedMemberUpdated.type,
     onError: associationRequestFailed.type
 })
 

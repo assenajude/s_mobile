@@ -43,7 +43,7 @@ function TrancheItem({numero, payed,payingTranche,renderRightActions,
                 flexDirection: 'row',
                 alignItems: 'center'
             }}>
-                <TextInput
+                <TextInput textAlign='center'
                     keyboardType='numeric' style={{
                     borderWidth: 1,
                     width: 100,
@@ -73,14 +73,15 @@ const styles = StyleSheet.create({
     container: {
        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        marginHorizontal: 40
     },
     itemText: {
       fontSize: 15
     },
     montant: {
       flexDirection: 'row',
-        marginHorizontal: 20
+        marginHorizontal: 5
     },
     numero: {
         height: 20,

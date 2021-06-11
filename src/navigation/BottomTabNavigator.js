@@ -8,7 +8,6 @@ import CotisationNavigation from "./CotisationNavigation";
 import defaultStyles from '../utilities/styles'
 import MemberCompteNavigator from "./MemberCompteNavigator";
 import EngagementNavigator from "./EngagementNavigator";
-import AuthNavigator from "./AuthNavigator";
 
 const BottomTabNavig = createBottomTabNavigator();
 

@@ -7,11 +7,7 @@ const cotisationSlice = createSlice({
     initialState: {
         loading: false,
         error: null,
-        list: [],
-        memberYearCotisations: [],
-        selectedMonthCotisations: [],
-        years: [],
-        months: []
+        list: []
     },
     reducers: {
         cotisationRequested: (state, action) => {
@@ -32,54 +28,19 @@ const cotisationSlice = createSlice({
           state.error = null
           state.list = action.payload
         },
-        initTimeData: (state, action) => {
-            state.years = action.payload.years
-            state.months = action.payload.months
-        },
-        selectYear: (state, action) => {
-            let selectedYear = state.years.find(item => item.year === action.payload.year)
-            selectedYear.selected = true
-            const otherItems = state.years.filter(item => item.year !== selectedYear.year)
-            otherItems.forEach(item => item.selected = false)
-            const memberCotisations = state.list.filter(cotis => cotis.memberId === action.payload.memberId)
-            const newCotisationTab = []
-            memberCotisations.forEach(cotisation => {
-                const creationDate = cotisation.datePayement
-                const creationYear = dayjs(creationDate).year()
-                if(creationYear === selectedYear.year) {
-                    newCotisationTab.push(cotisation)
-                  }
-            })
-                state.memberYearCotisations = newCotisationTab
-        },
-        showMonthDetail: (state, action) => {
-            const selectedCotisation = state.memberYearCotisations.filter(cotisation => {
-                const cotisationdate = cotisation.datePayement
-                const cotisationMonth = dayjs(cotisationdate).month()
-                if(cotisationMonth === action.payload.number) return true
-                return false
-            })
-            state.selectedMonthCotisations = selectedCotisation
-            let selectedMonth = state.months.find(item => item.label === action.payload.label)
-            selectedMonth.showDetail = !selectedMonth.showDetail
-            const otherMonths = state.months.filter(item => item.label !== selectedMonth.label)
-            otherMonths.forEach(item => item.showDetail = false)
-        },
-        showCotisationDetails: (state, action) => {
-            let selectedCotisation = state.selectedMonthCotisations.find(cotisation => cotisation.id === action.payload.id)
-            if(selectedCotisation) {
-                selectedCotisation.showDetail = !selectedCotisation.showDetail
-            }
-            const others = state.selectedMonthCotisations.filter(cotisation => cotisation.id !== selectedCotisation.id)
-            others.forEach(cotisation => cotisation.showDetail = false)
+        cotisationMoreDetail: (state, action) => {
+            let selected = state.list.find(cotis => cotis.id === action.payload.id)
+            selected.showMore = !selected.showMore
+            const others = state.list.filter(cotis => cotis.id !== action.payload.id)
+            others.forEach(cotisation => cotisation.showMore = false)
         }
     }
 })
 
 export default cotisationSlice.reducer
-const {initTimeData, selectYear, showMonthDetail,
-    cotisationAdded, cotisationRequested,
-    cotisationRequestFailed, cotisationReceived, showCotisationDetails} = cotisationSlice.actions
+const {
+    cotisationAdded, cotisationRequested, cotisationMoreDetail,
+    cotisationRequestFailed, cotisationReceived} = cotisationSlice.actions
 
 const url = '/cotisations'
 
@@ -101,18 +62,6 @@ export const getAllCotisations = (associationId) => apiRequested({
     onError: cotisationRequestFailed.type
 })
 
-export const populateTimeData = (data) => dispatch => {
-    dispatch(initTimeData(data))
-}
-
-export const getYearSelected = (year) => dispatch => {
-    dispatch(selectYear(year))
-}
-
-export const getMonthDetails = (month) => dispatch => {
-    dispatch(showMonthDetail(month))
-}
-
-export const getCotisationDetails = (cotisation) => dispatch => {
-    dispatch(showCotisationDetails(cotisation))
+export const getCotisationMoreDetail = (cotisation) => dispatch => {
+    dispatch(cotisationMoreDetail(cotisation))
 }

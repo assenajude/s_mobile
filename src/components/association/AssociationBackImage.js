@@ -3,7 +3,6 @@ import {View, Image, StyleSheet} from "react-native";
 import AppImagePicker from "../AppImagePicker";
 import AppText from "../AppText";
 import AppButton from "../AppButton";
-import {useDispatch, useStore} from "react-redux";
 import useUploadImage from "../../hooks/useUploadImage";
 import AppUploadModal from "../AppUploadModal";
 import useAuth from "../../hooks/useAuth";

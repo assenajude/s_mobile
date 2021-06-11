@@ -9,6 +9,7 @@ const authSlice = createSlice({
         isLoggedIn: false,
         user: {},
         roles: [],
+        allUsers: [],
         token: null
     },
     reducers: {
@@ -18,7 +19,7 @@ const authSlice = createSlice({
         },
         authRequestFailed: (state, action) => {
             state.loading = false
-            state.error = action.payload
+            state.error = action.payload.message? action.payload.message: action.payload
         },
         authRequestSuccess: (state,action) => {
             state.loading = false
@@ -32,19 +33,26 @@ const authSlice = createSlice({
           state.error = null
           state.user = action.payload
         },
-        loggedIn: (state) => {
-            state.isLoggedIn = !state.isLoggedIn
-        },
         logout: (state) => {
-                state.isLoggedIn = false,
-                state.user = {}
+            state.loading = false
+            state.error = null
+            state.isLoggedIn = false
+            state.user = {}
+            state.roles = []
+            state.allUsers = []
+            state.token = null
+        },
+        allUserReceived: (state, action) => {
+            state.loading = false
+            state.error = null
+            state.allUsers = action.payload
         }
     }
 
 })
 
 const {authRequested, authRequestFailed, authRequestSuccess,
-    loggedIn, logout, userUpdated} = authSlice.actions
+     logout, userUpdated, allUserReceived} = authSlice.actions
 export default authSlice.reducer
 
 const url = '/auth'
@@ -92,9 +100,14 @@ export const getUserImagesEdit = (data) => apiRequested({
     onSuccess: userUpdated.type,
     onError: authRequestFailed.type
 })
-export const getLoggedIn  = () => dispatch => {
-    dispatch(loggedIn())
-}
+
+export const getUserAllUsers = () => apiRequested({
+    url:'/user/allUsers',
+    method: 'get',
+    onStart: authRequested.type,
+    onSuccess: allUserReceived.type,
+    onError: authRequestFailed.type
+})
 
 export const getLogout = () => dispatch => {
     dispatch(logout())

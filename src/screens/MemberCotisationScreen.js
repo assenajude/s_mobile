@@ -2,12 +2,6 @@ import React, {useEffect, useRef} from 'react';
 import {ScrollView, View,FlatList, StyleSheet} from "react-native";
 import {useDispatch, useSelector} from "react-redux";
 
-import {
-    getCotisationDetails,
-    getMonthDetails,
-    getYearSelected,
-    populateTimeData
-} from "../store/slices/cotisationSlice";
 import {initYears} from '../utilities/years'
 import {initMonth} from '../utilities/months'
 import YearItem from "../components/cotisation/YearItem";
@@ -16,6 +10,8 @@ import ListItemSeparator from "../components/ListItemSeparator";
 import useCotisation from "../hooks/useCotisation";
 import AppAddNewButton from "../components/AppAddNewButton";
 import AppActivityIndicator from "../components/AppActivityIndicator";
+import useAuth from "../hooks/useAuth";
+import {getCotisationDetails, getMonthDetails, getYearSelected, populateTimeData} from "../store/slices/memberSlice";
 
 
 function MemberCotisationScreen({route, navigation}) {
@@ -24,11 +20,11 @@ function MemberCotisationScreen({route, navigation}) {
     const scrollRef = useRef()
     const {getMonthTotal} = useCotisation()
 
-    const selectedMonthCotisations = useSelector(state => state.entities.cotisation.selectedMonthCotisations)
-    const isLoading = useSelector(state => state.entities.cotisation.loading)
+    const selectedMonthCotisations = useSelector(state => state.entities.member.selectedMonthCotisations)
+    const isLoading = useSelector(state => state.entities.member.loading)
 
-    const allYears = useSelector(state => state.entities.cotisation.years)
-    const allMonths = useSelector(state => state.entities.cotisation.months)
+    const allYears = useSelector(state => state.entities.member.years)
+    const allMonths = useSelector(state => state.entities.member.months)
 
 
     const handleSelectYear = (year) => {
@@ -110,9 +106,7 @@ function MemberCotisationScreen({route, navigation}) {
                                      showMonthItemDetail={() => handleMonthDetail(item)}
                                      monthCotisations={selectedMonthCotisations}/>}
             />
-            <View style={styles.newCotisation}>
-                <AppAddNewButton onPress={() => navigation.navigate('NewCotisationScreen')}/>
-            </View>
+
         </>
     );
 }

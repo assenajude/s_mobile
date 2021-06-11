@@ -2,7 +2,6 @@ import React from 'react';
 import {createStackNavigator} from "@react-navigation/stack";
 import MemberCompteScreen from "../screens/MemberCompteScreen";
 import defaultStyles from "../utilities/styles";
-import EditMemberImageScreen from "../screens/EditMemberImageScreen";
 import AppText from "../components/AppText";
 import {View, TouchableOpacity} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
@@ -11,31 +10,28 @@ import {getLogout} from "../store/slices/authSlice";
 
 const MemberCompteNavig = createStackNavigator()
 
-function MemberCompteNavigator({navigation}) {
-    const dispatch = useDispatch()
+function MemberCompteNavigator(props) {
+/*    const dispatch = useDispatch()
 
     const handleLogout = () => {
-        dispatch(getLogout())
-        // navigation.navigate('AuthNavigator')
-    }
+        navigation.navigate('Starter')
+        // dispatch(getLogout())
+    }*/
 
     return (
-        <MemberCompteNavig.Navigator screenOptions={() => ({
+        <MemberCompteNavig.Navigator screenOptions={({navigation}) => ({
             headerStyle: {backgroundColor: defaultStyles.colors.rougeBordeau},
             headerTintColor: defaultStyles.colors.white,
             headerRight: () =>
-                <TouchableOpacity onPress={handleLogout}>
+                <TouchableOpacity onPress={() => navigation.navigate('Starter', {screen: 'StarterScreen'})}>
                     <View style={{alignItems: 'center', marginRight: 10}}>
-                        <MaterialCommunityIcons name="logout" size={24} color={defaultStyles.colors.white} />
-                        <AppText style={{color: defaultStyles.colors.white}}>Fermer</AppText>
+                        <MaterialCommunityIcons name="home" size={24} color={defaultStyles.colors.white} />
+                        <AppText style={{color: defaultStyles.colors.white}}>Accueil</AppText>
                     </View>
                 </TouchableOpacity>
 
         })}>
             <MemberCompteNavig.Screen name='Compte' component={MemberCompteScreen}/>
-            <MemberCompteNavig.Screen name='EditImage' component={EditMemberImageScreen} options={{
-                title: 'Editeur de profile'
-            }}/>
         </MemberCompteNavig.Navigator>
     );
 }

@@ -14,11 +14,11 @@ import AppImagePicker from "../components/AppImagePicker";
 import useAuth from "../hooks/useAuth";
 import EditFundModal from "../components/user/EditFundModal";
 import ListItemSeparator from "../components/ListItemSeparator";
-import BackgroundWithAvatar from "../components/member/BackgroundWithAvatar";
 import {LinearGradient} from "expo-linear-gradient";
 import useUploadImage from "../hooks/useUploadImage";
 import {getUserImagesEdit} from "../store/slices/authSlice";
 import AppUploadModal from "../components/AppUploadModal";
+import AppShowImage from "../components/AppShowImage";
 
 
 function UserCompteScreen({navigation}) {
@@ -36,8 +36,12 @@ function UserCompteScreen({navigation}) {
     const [editFund, setEditFund] = useState(false)
     const [progress, setProgress] = useState(0)
     const [uploadModal, setUploadModal] = useState(false)
-
     const [editing, setEditing] = useState(false)
+    const [imageUrl, setImageUrl] = useState('')
+    const [imageModal, setImageModal] = useState(false)
+
+    const isNotPieceRecto = pieceRecto?.piece === null || Object.keys(pieceRecto).length === 0
+    const isNotPieceVerso = pieceVerso?.piece === null || Object.keys(pieceVerso).length === 0
 
     const onChangeAvatar = (image) => {
         setAvatarImage(image)
@@ -45,13 +49,15 @@ function UserCompteScreen({navigation}) {
     }
 
     const deleteAvatarImage = () => {
-        if(avatarImage === null) {
+        if(Object.keys(avatarImage).length === 0 || avatarImage.avatar === null) {
             return;
         }
-        Alert.alert("Alert", "Voulez-vous supprimer l'image?", [{text: 'oui', onPress: () => {
-            return setAvatarImage(null)
-            }}, {text: 'non', onPress: () => {
-                return;
+        Alert.alert("Alert", "Que voulez-vous faire de l'image?", [{text: 'supprimer', onPress: () => {
+            return setAvatarImage(selectedUser)
+            }}, {text: 'afficher', onPress: () => {
+                const url = avatarImage.avatar?avatarImage.avatar : avatarImage.url
+                setImageUrl(url)
+                setImageModal(true)
             }}])
     }
 
@@ -93,6 +99,11 @@ function UserCompteScreen({navigation}) {
         alert("Vos images ont été editées avec succès.")
     }
 
+    const handleShowImage = (url) => {
+        setImageUrl(url)
+        setImageModal(true)
+    }
+
     return (
         <>
         <ScrollView>
@@ -126,37 +137,55 @@ function UserCompteScreen({navigation}) {
                 <LottieView style={{ width: 150}} autoPlay={true} loop={true} source={require('../../assets/animations/wallet-animation')}/>
                 <AppText style={styles.walletText}>{formatFonds(selectedUser.wallet)}</AppText>
             </View>
-                <TouchableOpacity>
-                    <View elevation={10} style={styles.exportFund}>
-                        <MaterialCommunityIcons name='export' size={30} color={defaultStyles.colors.bleuFbi}/>
+                <TouchableOpacity onPress={() => {
+                    if (selectedUser.wallet <= 0) {
+                        return alert("Vous n'avez pas fonds à retirer.")
+                    }
+                    navigation.navigate(routes.NEW_TRANSACTION, {typeTrans: 'Retrait de fonds'})
+                }}>
+                    <View  style={styles.exportFund}>
+                        <MaterialCommunityIcons
+                            name='export' size={30}
+                            color={defaultStyles.colors.bleuFbi}/>
                          <AppText style={{
                              color: defaultStyles.colors.bleuFbi,
                              fontWeight: 'bold'
                          }}>Retirer</AppText>
                     </View>
                 </TouchableOpacity>
-                {isAdmin() && <View style={styles.editFund}>
-                    <TouchableOpacity onPress={() => setEditFund(true)}>
+                <View style={styles.editFund}>
+                    <TouchableOpacity onPress={() => isAdmin()?setEditFund(true): navigation.navigate(routes.NEW_TRANSACTION, {typeTrans: 'Rechargement porteffeuille'})}>
                         <MaterialCommunityIcons name="credit-card-plus" size={30} color={defaultStyles.colors.vert} />
                     </TouchableOpacity>
-                </View>}
+                </View>
             </View>
             <View style={styles.piece}>
                  <View>
-                    {Object.keys(pieceRecto).length === 0 &&  <View style={styles.pieceContent}>
+                    {isNotPieceRecto &&  <View style={styles.pieceContent}>
                    <AppText style={{fontSize: 12}}>Choisir pièce recto</AppText>
                  </View>}
-                    {pieceRecto !== null && <Image source={{uri: pieceRecto.piece[0] || pieceRecto.url}} style={styles.pieceContent}/>}
+                    {pieceRecto !== null && <TouchableWithoutFeedback onPress={() => {
+                        const url = selectedUser.piece?selectedUser.piece[0] : pieceRecto.url
+                        handleShowImage(url)
+                    }}>
+                    <Image source={{uri: selectedUser.piece?pieceRecto.piece[0] : pieceRecto.url}} style={styles.pieceContent}/>
+                    </TouchableWithoutFeedback>
+                    }
                     <View style={styles.rectoCamera}>
                         <AppImagePicker cameraStyle={styles.cameraStyle} onSelectImage={selectPieceRecto}/>
                     </View>
                 </View>
                 <View>
-                    {Object.keys(pieceVerso).length === 0 && <View  style={styles.pieceContent}>
+                    {isNotPieceVerso && <View  style={styles.pieceContent}>
                   <AppText style={{fontSize: 12}}>Choisir pièce verso</AppText>
-
                   </View>}
-                  {pieceVerso !== null && <Image source={{uri: selectedUser.piece[1] || pieceVerso.url}} style={styles.pieceContent}/>}
+                  {pieceVerso !== null && <TouchableWithoutFeedback onPress={() => {
+                      const url = selectedUser.piece?selectedUser.piece[1] : pieceVerso.url
+                      handleShowImage(url)
+                  }}>
+                  <Image source={{uri: selectedUser.piece?selectedUser.piece[1] : pieceVerso.url}} style={styles.pieceContent}/>
+                  </TouchableWithoutFeedback>
+                  }
                     <View style={styles.versoCamera}>
                         <AppImagePicker cameraStyle={styles.cameraStyle} onSelectImage={selectPieceVerso}/>
                     </View>
@@ -183,7 +212,7 @@ function UserCompteScreen({navigation}) {
                     iconName='content-save-edit'/>
             </View>}
 
-            <TouchableOpacity style={styles.transaction}>
+            <TouchableOpacity onPress={() => navigation.navigate('Transaction')} style={styles.transaction}>
                 <MaterialCommunityIcons name="wallet-outline" size={24} color="black" />
                 <AppText style={{color: defaultStyles.colors.bleuFbi, fontWeight: 'bold', marginLeft: 5}}>Transactions</AppText>
             </TouchableOpacity>
@@ -191,6 +220,10 @@ function UserCompteScreen({navigation}) {
         </ScrollView>
             <EditFundModal editVisible={editFund} closeFundModal={() => setEditFund(false)}/>
             <AppUploadModal progress={progress} uploadModalVisible={uploadModal}/>
+            <AppShowImage
+                closeImageModal={() => setImageModal(false)}
+                imageModalVisible={imageModal}
+                imageUrl={imageUrl}/>
         </>
     );
 }

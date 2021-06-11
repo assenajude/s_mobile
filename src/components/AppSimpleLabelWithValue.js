@@ -2,13 +2,13 @@ import React from 'react';
 import AppText from "./AppText";
 import {View, StyleSheet} from "react-native";
 
-function AppSimpleLabelWithValue({label, labelValue}) {
+function AppSimpleLabelWithValue({label, labelValue, valueStyle}) {
     return (
         <View style={styles.container}>
             <AppText style={{fontWeight: 'bold'}}>{label}</AppText>
-            <AppText style={{
+            <AppText style={[{
                 marginLeft: '20%'
-            }}>{labelValue}</AppText>
+            }, valueStyle]}>{labelValue}</AppText>
         </View>
     );
 }

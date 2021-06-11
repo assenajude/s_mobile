@@ -1,7 +1,6 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState} from 'react';
 import  {View, FlatList, StyleSheet} from "react-native";
-import {MaterialCommunityIcons} from '@expo/vector-icons'
-import {useDispatch, useSelector, useStore} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 
 import MemberListItem from "../components/member/MemberListItem";
 import AppText from "../components/AppText";
@@ -15,21 +14,21 @@ import useEngagement from "../hooks/useEngagement";
 import {
     getEngagementDetail,
     getPayingTranche,
-    getTranchePayed,
     showEngagementTranches
 } from "../store/slices/engagementSlice";
 import useAuth from "../hooks/useAuth";
 import AppHeaderGradient from "../components/AppHeaderGradient";
 import {Picker} from "@react-native-picker/picker";
 import TrancheRightActions from "../components/tranche/TrancheRightActions";
+import AppActivityIndicator from "../components/AppActivityIndicator";
 
 function EtatEngagementScreen({navigation}) {
     const dispatch = useDispatch()
-    const store = useStore()
     const {getMemberUserCompte} = useAuth()
     const {formatFonds, associationValidMembers} = useManageAssociation()
     const {getMemberEngagementInfos, handlePayTranche} = useEngagement()
 
+    const isLoading = useSelector(state => state.entities.engagement.loading)
     const currentUser = useSelector(state => state.auth.user)
     const connectedMember = useSelector(state => {
         const listMember = state.entities.association.selectedAssociationMembers
@@ -54,22 +53,10 @@ function EtatEngagementScreen({navigation}) {
         if(value.toLowerCase() === 'member') setMainData(associationValidMembers())
         else setMainData(engagements)
     }
-/*
-    const handlePayTranche = (tranche, item) => {
-        const data = {
-            id: tranche.id,
-            montant: editTrancheMontant,
-            engagementId: item.id,
-            userId: currentUser.id
-        }
-        dispatch(getTranchePayed(data))
-    }*/
-
-    useEffect(() => {
-    }, [])
 
     return (
         <>
+            <AppActivityIndicator visible={isLoading}/>
             <AppHeaderGradient/>
             <View>
                 <Picker itemStyle={{fontWeight: 'bold'}} style={styles.picker} mode='dropdown' selectedValue={pickerValue} onValueChange={val => {
@@ -108,6 +95,7 @@ function EtatEngagementScreen({navigation}) {
                          }
 
                          return <EngagementItem
+                             getMoreDetails={() => navigation.navigate('MemberEngagementDetail', item)}
                              renderRightActions={(tranche) =>
                                  connectedMember.id === item.creatorId?<TrancheRightActions
                                  ended={tranche.montant===tranche.solde}
@@ -143,8 +131,8 @@ function EtatEngagementScreen({navigation}) {
 const styles = StyleSheet.create({
     addNew: {
       position: 'absolute',
-      bottom: 20,
-      right: 20
+      bottom: 5,
+      right: 5
     },
     dropdown: {
         flexDirection: 'row',

@@ -1,9 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {View, ScrollView, Image, StyleSheet, TouchableWithoutFeedback} from "react-native";
+import {View, ScrollView, StyleSheet} from "react-native";
 
 import AppText from "../components/AppText";
 import useManageAssociation from "../hooks/useManageAssociation";
-import {useSelector} from "react-redux";
 import AppAddNewButton from "../components/AppAddNewButton";
 import routes from "../navigation/routes";
 import defaultStyles from "../utilities/styles";

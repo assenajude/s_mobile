@@ -4,8 +4,11 @@ import {MaterialCommunityIcons} from '@expo/vector-icons'
 import defaultStyles from '../../utilities/styles'
 import AssociationItem from "./AssociationItem";
 import AppText from "../AppText";
+import {useSelector} from "react-redux";
 
 function AssociationModal({visible, closeModal, associations, selectAssociation}) {
+
+    const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
 
     return (
         <Modal visible={visible} transparent>
@@ -28,6 +31,7 @@ function AssociationModal({visible, closeModal, associations, selectAssociation}
                           numColumns={2}
                           renderItem={({item}) =>
                               <AssociationItem
+                                  borderStyle={item.id === currentAssociation.id?{borderWidth: 1, borderColor: defaultStyles.colors.bleuFbi}:{}}
                                   association={item}
                                   nom={item.nom} showState={false}
                                   onPress={() => selectAssociation(item)}/>}
@@ -46,7 +50,7 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         backgroundColor: defaultStyles.colors.white,
-        height: '80%',
+        height: '90%',
         width: '100%',
         top: 80,
         position: 'absolute',

@@ -1,5 +1,5 @@
-import React, {useState, useRef} from 'react';
-import {View, TouchableOpacity, StyleSheet, TouchableWithoutFeedback} from "react-native";
+import React from 'react';
+import {View, TouchableOpacity, StyleSheet} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import AppText from "../AppText";
 import useManageAssociation from "../../hooks/useManageAssociation";
@@ -10,13 +10,13 @@ import AppSimpleLabelWithValue from "../AppSimpleLabelWithValue";
 import TrancheItem from "../tranche/trancheItem";
 import {getPayingTranche} from "../../store/slices/engagementSlice";
 import {useDispatch} from "react-redux";
-import TrancheRightActions from "../tranche/TrancheRightActions";
+import * as Progress from "react-native-progress";
 
 
 function EngagementItem({getEngagementDetails,getMembersDatails,selectedMember,engagement,tranches,renderRightActions,
-                            engagementDetails, handleVoteUp, handleVoteDown, showAvatar=true, inList=false,
+                            engagementDetails, handleVoteUp, handleVoteDown, showAvatar=true,
                             allVoted, downVotes, upVotes, isVoting, validationDate, showTranches, getTranchesShown,
-                            handlePayTranche, onChangeTrancheMontant, editTrancheMontant}) {
+                            handlePayTranche, onChangeTrancheMontant, editTrancheMontant, getMoreDetails}) {
 
     const dispatch = useDispatch()
     const {formatFonds, formatDate} = useManageAssociation()
@@ -24,22 +24,27 @@ function EngagementItem({getEngagementDetails,getMembersDatails,selectedMember,e
     return (
         <>
 
+
             <View style={styles.container}>
+                <View style={{
+                    marginVertical: 10
+                }}>
+                    { engagement.progression>0 && engagement.progression<1 &&
+                    <Progress.Bar
+                        color={engagement.progression<0.5?defaultStyles.colors.rougeBordeau : defaultStyles.colors.bleuFbi}
+                        progress={engagement.progression}
+                        width={200}/>
+                    }
+                    {engagement.progression === 1 && <MaterialCommunityIcons name="credit-card-check" size={24} color={defaultStyles.colors.vert} />}
+                </View>
                 <AppText numberOfLines={2} style={{width: '50%', fontWeight: 'bold'}}>{engagement.libelle}</AppText>
                 <View style={styles.montant}>
                     <AppText style={{fontSize: 15, fontWeight: 'bold'}}>{formatFonds(engagement.montant)}</AppText>
                 </View>
-                {inList && !engagementDetails && <View>
-                    <AppText style={{color: defaultStyles.colors.bleuFbi}}> + Details</AppText>
-                </View>}
+                <View style={{marginVertical: 10 }}>
+                    <AppText onPress={getMoreDetails} style={{color: defaultStyles.colors.bleuFbi}}> + Details</AppText>
+                </View>
                 {engagementDetails && <View>
-                    <View style={{
-                        backgroundColor: defaultStyles.colors.bleuFbi,
-                        alignItems: 'center',
-                        marginVertical: 10
-                    }}>
-                        <AppText style={{color: defaultStyles.colors.white}}>Details</AppText>
-                    </View>
                     <AppSimpleLabelWithValue label='Montant demandée' labelValue={formatFonds(engagement.montant)}/>
                     <AppSimpleLabelWithValue label='Montant Interet' labelValue={formatFonds(engagement.interetMontant)}/>
                     <AppSimpleLabelWithValue label='Total à rembourser' labelValue={formatFonds(engagement.montant+engagement.interetMontant)}/>
@@ -82,7 +87,7 @@ function EngagementItem({getEngagementDetails,getMembersDatails,selectedMember,e
                     </View>
                     <View style={{
                         alignItems: 'center',
-                        marginRight: 20,
+                        marginRight: 100,
                         width: 60,
                         paddingHorizontal: 15,
                         alignSelf: 'flex-end',
@@ -129,7 +134,7 @@ const styles = StyleSheet.create({
     },
     container: {
         paddingHorizontal: 10,
-        marginVertical: 20,
+        marginVertical: 40,
         marginTop: 10
     },
     detail:{
@@ -141,8 +146,8 @@ const styles = StyleSheet.create({
     },
     icon: {
       position: 'absolute',
-      right: 40,
-      top: 40,
+      right: 100,
+      bottom: -30,
         backgroundColor: defaultStyles.colors.white,
         paddingHorizontal: 10
     },

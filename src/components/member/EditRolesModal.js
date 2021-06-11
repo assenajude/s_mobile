@@ -5,8 +5,7 @@ import * as Yup from 'yup'
 import {AppForm, AppFormField, FormSubmitButton} from "../form";
 import AppButton from "../AppButton";
 import defaultStyles from '../../utilities/styles'
-import useAuth from "../../hooks/useAuth";
-import {useDispatch} from "react-redux";
+import {useDispatch, useStore} from "react-redux";
 import {getMemberRolesEdited} from "../../store/slices/associationSlice";
 
 
@@ -14,17 +13,22 @@ import {getMemberRolesEdited} from "../../store/slices/associationSlice";
 const validRoles = Yup.object().shape({
     roles: Yup.string()
 })
-function EditRolesModal({editRoles, dismissModal}) {
-    const {getConnectedMember} = useAuth()
+function EditRolesModal({editRoles, dismissModal, member}) {
 
     const dispatch = useDispatch()
+    const store = useStore()
 
-    const handleEditRoles = (role) => {
+    const handleEditRoles = async (role) => {
         const data = {
-            memberId: getConnectedMember().member.id,
+            memberId: member.id,
             roles: [role.roles]
         }
-        dispatch(getMemberRolesEdited(data))
+        await dispatch(getMemberRolesEdited(data))
+        const error = store.getState().entities.association.error
+        if(error !== null) {
+           return  alert("Error editing the roles")
+        }
+        alert("Role édité avec succès")
     }
 
 

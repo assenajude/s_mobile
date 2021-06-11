@@ -3,8 +3,6 @@ import {createStackNavigator} from "@react-navigation/stack";
 import MembersListScreen from "../screens/MembersListScreen";
 import defaultStyles from "../utilities/styles";
 import MemberDetails from "../screens/MemberDetails";
-import MemberCotisationScreen from "../screens/MemberCotisationScreen";
-import MemberEngagementScreen from "../screens/MemberEngagementScreen";
 import EditMemberScreen from "../screens/EditMemberScreen";
 
 const MemberNavig = createStackNavigator()
@@ -25,9 +23,6 @@ function MembersNavigator(props) {
                 title: 'Membre '+ route.params.username,
             })}/>
 
-            <MemberNavig.Screen name='MemberEngagementScreen' component={MemberEngagementScreen} options={({route}) => ({
-                title: 'Engagements de '+ route.params.username,
-            })}/>
         </MemberNavig.Navigator>
     );
 }

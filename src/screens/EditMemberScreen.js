@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {ScrollView, ToastAndroid} from "react-native";
 import * as Yup from 'yup'
 
@@ -6,6 +6,8 @@ import {AppForm, AppFormField, FormSubmitButton} from "../components/form";
 import {useDispatch, useSelector, useStore} from "react-redux";
 import {addNewMember, getUpdateOneMember} from "../store/slices/memberSlice";
 import AppTimePicker from "../components/AppTimePicker";
+import AppActivityIndicator from "../components/AppActivityIndicator";
+import {getSelectedAssociationMembers} from "../store/slices/associationSlice";
 
 const validMember = Yup.object().shape({
     statut: Yup.string(),
@@ -17,24 +19,26 @@ function EditMemberScreen({route, navigation}) {
     const selectEdited = route.params
     const dispatch = useDispatch()
     const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
+    const isLoading = useSelector(state => state.entities.member.loading)
     const [edit, setEdit] = useState(selectEdited?true:false)
 
-    const handleAddMember = (member) => {
+    const handleAddMember = async (member) => {
         let data;
         if (edit) {
-            data = {...member, currentMemberId: selectEdited.id}
-            dispatch(getUpdateOneMember(data))
+            data = {...member, currentMemberId: selectEdited.member.id}
+            await dispatch(getUpdateOneMember(data))
         } else {
             data = {
                 ...member,
                 associationId: currentAssociation.id
             }
-            dispatch(addNewMember(data))
+            await dispatch(addNewMember(data))
         }
         const error = store.getState().entities.member.error
         if (error !== null) {
             return alert('error: impossible de sauvegarder vos données.')
         }else {
+            dispatch(getSelectedAssociationMembers({associationId: currentAssociation.id}))
             ToastAndroid.showWithGravityAndOffset(
                 'Données sauvegardées avec succès',
                 ToastAndroid.LONG,
@@ -42,15 +46,13 @@ function EditMemberScreen({route, navigation}) {
                 25,
                 50
             );
-            navigation.goBack()
+            navigation.navigate('Members', {screen: 'List'})
         }
     }
 
-
-    useEffect(() => {
-    }, [])
-
     return (
+        <>
+            <AppActivityIndicator visible={isLoading}/>
         <ScrollView contentContainerStyle={{padding: 20}}>
             <AppForm
                 initialValues={{
@@ -67,6 +69,7 @@ function EditMemberScreen({route, navigation}) {
                 <FormSubmitButton title='Ajouter'/>
             </AppForm>
         </ScrollView>
+        </>
     );
 }
 

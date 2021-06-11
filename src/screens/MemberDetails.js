@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {View, ScrollView, Image, StyleSheet, TouchableWithoutFeedback} from "react-native";
+import React, {useState} from 'react';
+import {View, ScrollView, StyleSheet, TouchableWithoutFeedback} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 
 import defaultStyles from '../utilities/styles'
@@ -11,6 +11,7 @@ import useCotisation from "../hooks/useCotisation";
 import useEngagement from "../hooks/useEngagement";
 import useAuth from "../hooks/useAuth";
 import EditRolesModal from "../components/member/EditRolesModal";
+import AppLabelWithValue from "../components/AppLabelWithValue";
 
 
 function MemberDetails({route, navigation}) {
@@ -25,8 +26,6 @@ function MemberDetails({route, navigation}) {
 
     const isAuthorized = isAdmin() || isModerator()
 
-    useEffect(() => {
-    }, [])
 
     return (
         <>
@@ -51,30 +50,16 @@ function MemberDetails({route, navigation}) {
                 <AppText style={{color: defaultStyles.colors.bleuFbi, fontSize: 20, fontWeight: 'bold'}}>{selectedMember.member.statut}</AppText>
             </View>
             <View style={{marginTop: 30}}>
-                <View style={styles.detailContainer}>
-                    <AppText>FONDS</AppText>
-                    <AppText>{formatFonds(selectedMember.member.fonds)}</AppText>
-                </View>
-                <View style={styles.detailContainer}>
-                    <AppText>NOM</AppText>
-                    <AppText>{selectedMember.nom}</AppText>
-                </View>
-                <View style={styles.detailContainer}>
-                    <AppText>PRENOMS</AppText>
-                    <AppText>{selectedMember.prenom}</AppText>
-                </View>
-                <View style={styles.detailContainer}>
-                    <AppText>TELEPHONE</AppText>
-                    <AppText>{selectedMember.phone}</AppText>
-                </View>
-                <View style={styles.detailContainer}>
-                    <AppText>AUTRES ADRESSES</AppText>
-                    <AppText>{selectedMember.adresse}</AppText>
-                </View>
-                <View style={styles.detailContainer}>
-                    <AppText>Date adhesion</AppText>
-                    <AppText>{formatDate(selectedMember.member.adhesionDate)}</AppText>
-                </View>
+
+                <AppLabelWithValue label='Fonds' value={formatFonds(selectedMember.member.fonds)}/>
+                <AppLabelWithValue label='Nom' value={selectedMember.nom || "ajoutez votre nom"}/>
+                <AppLabelWithValue label='Prenoms' value={selectedMember.prenom || "ajoutez votre prenom"}/>
+                <AppLabelWithValue label='Telephone' value={selectedMember.phone || "ajoutez un numero de telephone"}/>
+                <AppLabelWithValue label='Profession' value={selectedMember.profession || "Quelle est votre profession?"}/>
+                <AppLabelWithValue label='Statut emploi' value={selectedMember.emploi || "Avez-vous un emploi?"}/>
+                <AppLabelWithValue label='Autres adresses' value={selectedMember.adresse || "ajoutez une adresse (ex: votre ville)"}/>
+                <AppLabelWithValue label="Date d'adhésion" value={formatDate(selectedMember.member.adhesionDate)}/>
+
             </View>
             <View>
                 <TouchableWithoutFeedback
@@ -107,6 +92,7 @@ function MemberDetails({route, navigation}) {
             </View>
         </ScrollView>
             <EditRolesModal
+                member={selectedMember.member}
                 editRoles={editRoles}
                 dismissModal={() => setEditRoles(false)}/>
         </>

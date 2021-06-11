@@ -24,9 +24,7 @@ function MonthItem({month, showMonthDetail, showMonthItemDetail, monthCotisation
               {monthCotisations && monthCotisations.length>0 && <ScrollView>
                   {monthCotisations.map(item =>
                       <CotisationItem key={item.id.toString()}
-                                      datePayement={item.datePayement}
-                                      montant={item.montant}
-                                      details={item.motif}
+                                      cotisation={item}
                                       cotisationDetail={item.showDetail}
                                       getCotisationDetails={() => getCotisationDetails(item)}/>)}
               </ScrollView>

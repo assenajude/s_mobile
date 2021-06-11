@@ -29,42 +29,56 @@ function NewAssociationScreen({navigation, route}) {
     const [uploadModal, setUploadModal] = useState(false)
 
     const handleNewAssociation = async(data) => {
-        const transmedArray = dataTransformer([data.avatar])
-        setProgresss(0)
-        setUploadModal(true)
-        const result = await directUpload(transmedArray, [data.avatar], (progress) => {
-            setProgresss(progress)
-        })
-        setUploadModal(false)
+        const avatarArray = [data.avatar]
         let newData = {}
-        if(!result) {
-           Alert.alert("Erreur", "Les images n'ont pas été telechargées, voulez-vous continuer?",
-               [{text: 'oui', onPress: () => {
-                       newData = {
-                           nom:data.nom,
-                           avatar: '',
-                           description: data.description,
-                           cotisationMensuelle: data.cotisationMensuelle,
-                           frequenceCotisation: data.frequenceCotisation,
-                           fondInitial: data.fondInitial,
-                           seuilSecurite: data.seuilSecurite,
-                           interetCredit: data.interetCredit
-                       }
-                   }}, {text: 'non', onPress: () => {
-                       return;
-                   }}])
-        }
-        const signedArray = store.getState().uploadImage.signedRequestArray
-        const avatarUrl = signedArray[0].url
-        newData = {
-            nom:data.nom,
-            avatar: avatarUrl,
-            description: data.description,
-            cotisationMensuelle: data.cotisationMensuelle,
-            frequenceCotisation: data.frequenceCotisation,
-            fondInitial: data.fondInitial,
-            seuilSecurite: data.seuilSecurite,
-            interetCredit: data.interetCredit
+        if(Object.keys(avatarArray[0]).length === 0) {
+            newData = {
+                nom:data.nom,
+                avatar: '',
+                description: data.description,
+                cotisationMensuelle: data.cotisationMensuelle,
+                frequenceCotisation: data.frequenceCotisation,
+                fondInitial: data.fondInitial,
+                seuilSecurite: data.seuilSecurite,
+                interetCredit: data.interetCredit
+            }
+        } else {
+            const transmedArray = dataTransformer(avatarArray)
+            setProgresss(0)
+            setUploadModal(true)
+            const result = await directUpload(transmedArray, avatarArray, (progress) => {
+                setProgresss(progress)
+            })
+            setUploadModal(false)
+            if(!result) {
+                Alert.alert("Erreur", "Les images n'ont pas été telechargées, voulez-vous continuer?",
+                    [{text: 'oui', onPress: () => {
+                            newData = {
+                                nom:data.nom,
+                                avatar: '',
+                                description: data.description,
+                                cotisationMensuelle: data.cotisationMensuelle,
+                                frequenceCotisation: data.frequenceCotisation,
+                                fondInitial: data.fondInitial,
+                                seuilSecurite: data.seuilSecurite,
+                                interetCredit: data.interetCredit
+                            }
+                        }}, {text: 'non', onPress: () => {
+                            return;
+                        }}])
+            }
+            const signedArray = store.getState().uploadImage.signedRequestArray
+            const avatarUrl = signedArray[0].url
+            newData = {
+                nom:data.nom,
+                avatar: avatarUrl,
+                description: data.description,
+                cotisationMensuelle: data.cotisationMensuelle,
+                frequenceCotisation: data.frequenceCotisation,
+                fondInitial: data.fondInitial,
+                seuilSecurite: data.seuilSecurite,
+                interetCredit: data.interetCredit
+            }
         }
         await dispatch(addNewAssociation(newData))
         const error = store.getState().entities.association.error

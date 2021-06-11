@@ -5,15 +5,19 @@ import {MaterialCommunityIcons} from '@expo/vector-icons'
 import DashboardScreen from "../screens/DashboardScreen";
 import AppLabelWithIcon from "../components/AppLabelWithIcon";
 import AssociationModal from "../components/association/AssociationModal";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import defaultStyles from "../utilities/styles";
 import NewsScreen from "../screens/NewsScreen";
 import NewInformationScreen from "../screens/NewInformation";
 import NouvelleAdhesionScreen from "../screens/NouvelleAdhesionScreen";
+import {setSelectedAssociation} from "../store/slices/associationSlice";
+import useAuth from "../hooks/useAuth";
 
 const AssocNavig = createStackNavigator()
 
 function AssociationNavigator(props) {
+    const dispatch = useDispatch()
+    const {getInitAssociation} = useAuth()
 
     const [associationModalVisible, setAssociationModalVisible] = useState(false)
     const memberAssociations = useSelector(state => {
@@ -27,6 +31,8 @@ function AssociationNavigator(props) {
     }
 
     const handleSelectAssociation = (item) => {
+        dispatch(setSelectedAssociation(item))
+        getInitAssociation(item)
         setAssociationModalVisible(false)
     }
 

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {View, FlatList, StyleSheet} from "react-native";
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 
@@ -10,30 +10,28 @@ import ListItemSeparator from "../components/ListItemSeparator";
 import useCotisation from "../hooks/useCotisation";
 import useManageAssociation from "../hooks/useManageAssociation";
 import AppHeaderGradient from "../components/AppHeaderGradient";
+import AppAddNewButton from "../components/AppAddNewButton";
+import routes from "../navigation/routes";
+import useAuth from "../hooks/useAuth";
 
 function EtatCotisationScreen({navigation}) {
-    const {getMemberCotisations, checkCotisationUpToDate} = useCotisation()
+    const {getConnectedMember} = useAuth()
+    const {getMemberCotisations, notPayedCompter} = useCotisation()
     const {formatFonds, associationValidMembers} = useManageAssociation()
-
     const error = useSelector(state => state.entities.cotisation.error)
 
-    useEffect(() => {
-    }, [])
 
-
-    if(associationValidMembers().length===0 && error === null) {
-        return <View style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: 'center'
-        }}>
-            <AppText>Aucune cotisation trouvée</AppText>
-        </View>
-    }
     return (
         <>
             <AppHeaderGradient/>
-            <FlatList data={associationValidMembers()}
+            {associationValidMembers().length === 0 && error === null && <View style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: 'center'
+            }}>
+                <AppText>Aucune cotisation trouvée</AppText>
+                </View>}
+            {associationValidMembers().length>0 && <FlatList data={associationValidMembers()}
                       keyExtractor={item => item.id.toString()}
                       ItemSeparatorComponent={ListItemSeparator}
                       renderItem={({item}) =>
@@ -42,11 +40,18 @@ function EtatCotisationScreen({navigation}) {
                               <AppText style={{marginHorizontal: 10}}>({getMemberCotisations(item).cotisationLenght})</AppText>
                               <AppText style={{marginHorizontal: 10}}>{formatFonds(getMemberCotisations(item).totalCotisation)}</AppText>
                           <View style={styles.checker}>
-                            {checkCotisationUpToDate(item) && <MaterialCommunityIcons name="account-check" size={24} color={defaultStyles.colors.vert} />}
-                              {!checkCotisationUpToDate(item) && <MaterialCommunityIcons name="account-alert" size={24} color="orange" />}
+                            {notPayedCompter(item.member) === 0 && <MaterialCommunityIcons name="account-check" size={24} color={defaultStyles.colors.vert} />}
+                              {notPayedCompter(item.member) > 0 && <MaterialCommunityIcons name="account-alert" size={24} color="orange" />}
                           </View>
                       </MemberListItem>}
-            />
+            />}
+
+            <View style={styles.listButton}>
+                <AppAddNewButton
+                    compter={notPayedCompter(getConnectedMember()?.member)}
+                    name='view-list'
+                    onPress={() => navigation.navigate(routes.LIST_COTISATION)}/>
+            </View>
         </>
     );
 }
@@ -55,6 +60,11 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 5,
         top: -35
+    },
+    listButton: {
+        position: 'absolute',
+        right: 15,
+        bottom: 15
     }
 })
 export default EtatCotisationScreen;

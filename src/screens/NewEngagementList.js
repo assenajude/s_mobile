@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {View, FlatList, StyleSheet} from "react-native";
 import AppText from "../components/AppText";
 import {useDispatch, useSelector} from "react-redux";
@@ -13,36 +13,36 @@ import {
     voteEngagement
 } from "../store/slices/engagementSlice";
 import ListItemSeparator from "../components/ListItemSeparator";
+import AppActivityIndicator from "../components/AppActivityIndicator";
+import {getConnectedMember, getSelectedAssociation} from "../store/slices/associationSlice";
 
 function NewEngagementList(props) {
     const dispatch = useDispatch()
-    const {getMemberUserCompte} = useAuth()
+    const {getMemberUserCompte, getConnectedMember:connectedMember} = useAuth()
     const {getEngagementVotesdData} = useEngagement()
 
-    const user = useSelector(state => state.auth.user)
     const currentAssociation = useSelector(state => state.entities.association.selectedAssociation)
     const voting = useSelector(state => state.entities.engagement.votesList)
+    const isLoading = useSelector(state => state.entities.engagement.loading)
     const allTranches = useSelector(state => state.entities.engagement.tranches)
-    const connectedMember = useSelector(state => {
-        const listMember = state.entities.association.selectedAssociationMembers
-        const currentMember = listMember.find(item => item.id === user.id)
-        return currentMember
-    })
+
     const validationEngagement = useSelector(state => {
         const list = state.entities.engagement.list
         const selectedList = list.filter(item => item.accord === false)
         return selectedList
     })
 
-    const voteUp = (item) => {
+    const voteUp = async (item) => {
         const data = {
             id: item.id,
             typeVote: 'up',
-            votorId: connectedMember.id,
+            votorId: connectedMember().id,
             associationId: currentAssociation.id
         }
         dispatch(voteEngagement(data))
         dispatch(getAllVotes({associationId: currentAssociation.id}))
+        dispatch(getSelectedAssociation({associationId: currentAssociation.id}))
+        dispatch(getConnectedMember({associationId: currentAssociation.id, memberId: connectedMember().id}))
 
     }
 
@@ -50,18 +50,17 @@ function NewEngagementList(props) {
         const data = {
             id: item.id,
             typeVote: 'down',
-            votorId: connectedMember.id,
+            votorId: connectedMember().id,
             associationId: currentAssociation.id
         }
         dispatch(voteEngagement(data))
         dispatch(getAllVotes({associationId: currentAssociation.id}))
     }
 
-    useEffect(() => {
-    }, [])
 
     return (
         <>
+           <AppActivityIndicator visible={isLoading}/>
             {validationEngagement.length=== 0 && <View style={styles.empty}>
                 <AppText>Aucun engagement trouvé</AppText>
             </View>}

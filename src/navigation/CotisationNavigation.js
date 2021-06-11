@@ -1,11 +1,10 @@
 import React from 'react';
-import {MaterialCommunityIcons} from '@expo/vector-icons'
 import {createStackNavigator} from "@react-navigation/stack";
 import EtatCotisationScreen from "../screens/EtatCotisationScreen";
 import defaultStyles from "../utilities/styles";
 import NewCotisationScreen from "../screens/NewCotisationScreen";
 import MemberCotisationScreen from "../screens/MemberCotisationScreen";
-import {TouchableWithoutFeedback} from "react-native";
+import ListCotisationScreen from "../screens/ListCotisationScreen";
 
 const CotisationNavig = createStackNavigator()
 
@@ -24,6 +23,11 @@ function CotisationNavigation(props) {
                                     options={{
                                         title: 'Nouvelle cotisation'
                                     }}/>
+            <CotisationNavig.Screen name='ListCotisation' component={ListCotisationScreen}
+                                    options={{
+                                        title: 'Liste des cotisations'
+                                    }}/>
+
             <CotisationNavig.Screen name='MemberCotisationScreen' component={MemberCotisationScreen} options={({route, navigation}) => ({
                 title: 'Cotisations de '+route.params?.username || +route.params.nom,
             })}/>
